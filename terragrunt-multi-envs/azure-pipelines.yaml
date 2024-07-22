@@ -1,0 +1,16 @@
+# ESLZ Pipeline terraform code automatic deployment with dual approval gates
+# Approve the Apply in the environment page. Then if Apply is successful, merge into the main branch.
+# Use this as an example and adapt it to your environment.
+name: $(Date:yyyyMMdd).$(Rev:r)
+trigger: none
+variables:
+  - name: BASH_ENV
+    value: "~/.profile"
+stages: 
+  - template: pipelines/stage-elszenvs-template.yaml
+    parameters:
+      eslzEnvs:
+        - envName: 'dev' # Name of the folder of the environment
+          serviceConnection: # Name of the service connection to the subscription
+          pool: 'Devops' # Name of the self-hosted agent pool 
+          layers: ['L2_blueprint_project'] # name of the folders of the layers tracked for changes

@@ -1,0 +1,87 @@
+parameters:
+  - name: layers
+    type: object
+  - name: serviceConnection
+    type: string
+  - name: eslzEnvFolder
+    type: string
+
+
+jobs:
+- ${{ each layer in parameters.layers }}:  
+  - job: TerragruntPlan_${{ parameters.eslzEnvFolder}}_${{ layer }}
+    dependsOn: InitJob
+    condition: and(succeeded(), eq(dependencies.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
+    steps:
+      - task: AzureCLI@2
+        name: TerragruntInit
+        inputs:
+          azureSubscription: ${{ parameters.serviceConnection }}
+          scriptType: bash
+          scriptLocation: inlineScript
+          addSpnToEnvironment: true
+          inlineScript: |
+            export ARM_CLIENT_ID=$servicePrincipalId
+            export ARM_OIDC_TOKEN=$idToken
+            export ARM_TENANT_ID=$tenantId
+            export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+            export ARM_USE_OIDC=true
+
+            echo "##vso[task.setvariable variable=ARMClient;issecret=true]$ARM_CLIENT_ID"
+            echo "##vso[task.setvariable variable=OIDCToken;issecret=true]$ARM_OIDC_TOKEN"
+            echo "##vso[task.setvariable variable=SubID;issecret=true]$ARM_SUBSCRIPTION_ID"
+            echo "##vso[task.setvariable variable=TenantID;issecret=true]$ARM_TENANT_ID"
+
+            cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
+            terragrunt init
+
+      - task: bash@3
+        name: TerragruntPlan
+        inputs:
+          targetType: inline
+          script: |         
+            cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
+            terragrunt plan -detailed-exitcode --out=$(Build.ArtifactStagingDirectory)/plan.tfplan
+            terragrunt show -no-color $(Build.ArtifactStagingDirectory)/plan.tfplan > $(Build.ArtifactStagingDirectory)/plan_${{ layer }}.txt
+        env:
+          ARM_CLIENT_ID: $(ARMClient)
+          ARM_TENANT_ID: $(TenantID)
+          ARM_SUBSCRIPTION_ID: $(SubID)
+          ARM_OIDC_TOKEN: $(OIDCToken)
+          ARM_USE_OIDC: true
+
+      - task: bash@3
+        name: CommentPlanOnPR
+        inputs:
+          targetType: inline
+          script: |
+            if [ "$(Build.Reason)" == "PullRequest" ]; then
+                
+                cd $(agent.tempdirectory)
+                echo "# Plan For ${{ parameters.eslzEnvFolder}}/${{ layer }} :" > commentplan_${{ layer }}.txt
+                cat $(Build.ArtifactStagingDirectory)/plan_${{ layer }}.txt >> commentplan_${{ layer }}.txt
+                ENCODED_URL=$(echo "${SYSTEM_COLLECTIONURI}${SYSTEM_TEAMPROJECT}/_apis/git/repositories/${BUILD_REPOSITORYID}/pullRequests/${SYSTEM_PULLREQUEST_PULLREQUESTID}/threads?api-version=7.1-preview.1" | sed 's/ /%20/g')
+                COMMENT_JSON=$(jq --rawfile comment commentplan_${{ layer }}.txt '.comments[0].content=$comment' <<< '{"comments": [{"parentCommentId": 0,"content": "","commentType": 1}],"status": 1}')
+            
+                echo "POSTING TO $ENCODED_URL"
+                curl "$ENCODED_URL" \
+                --header "Content-Type: application/json" \
+                --header "Accept: application/json" \
+                --header "Authorization: Bearer $SYSTEM_ACCESSTOKEN" \
+                --data "$COMMENT_JSON" \
+                --verbose
+            else
+                echo "Skipping post comment due to no pull request"
+            fi
+        env:
+          SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+          SYSTEM_COLLECTIONURI: $(System.CollectionUri)
+          SYSTEM_TEAMPROJECT: $(System.TeamProject)
+          BUILD_REPOSITORYID: $(Build.Repository.ID)
+          SYSTEM_PULLREQUEST_PULLREQUESTID: $(System.PullRequest.PullRequestId)
+
+      - task: PublishBuildArtifacts@1
+        name: PublishPlan
+        inputs:
+          PathtoPublish: $(Build.ArtifactStagingDirectory)
+          ArtifactName: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}

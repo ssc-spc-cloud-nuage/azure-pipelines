@@ -1,0 +1,42 @@
+parameters:
+  - name: layers
+    type: object
+  - name: serviceConnection
+    type: string
+  - name: eslzEnvFolder
+    type: string
+
+
+jobs:
+- ${{ each layer in parameters.layers }}:  
+  - deployment: TerragruntApply_${{ parameters.eslzEnvFolder}}_${{ layer }}
+    condition: and(succeeded(), eq(stageDependencies.${{ parameters.eslzEnvFolder}}_Plan.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
+    environment: ${{ parameters.eslzEnvFolder}}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: DownloadBuildArtifacts@1
+              name: DownloadPlan
+              inputs:
+                buildType: current
+                downloadType: single
+                artifactName: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
+                downloadPath: '$(Agent.TempDirectory)'
+            - task: AzureCLI@2
+              displayName: 'terragrunt apply'
+              inputs:
+                azureSubscription: ${{ parameters.serviceConnection }}
+                scriptType: bash
+                scriptLocation: inlineScript
+                addSpnToEnvironment: true
+                inlineScript: |
+                  export ARM_CLIENT_ID=$servicePrincipalId
+                  export ARM_OIDC_TOKEN=$idToken
+                  export ARM_TENANT_ID=$tenantId
+                  export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+                  export ARM_USE_OIDC=true
+
+                  cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
+                  terragrunt apply -auto-approve $(Agent.TempDirectory)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan
+                failOnStderr : true
