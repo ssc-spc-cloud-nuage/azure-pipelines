@@ -6,6 +6,13 @@ trigger: none
 variables:
   - name: BASH_ENV
     value: "~/.profile"
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: ssc-spc-cloud-nuage/azure-pipelines
+      ref: refs/tags/v1.0.0
+      endpoint: 'gh-ssc-spc-cloud-nuage-sc'
 stages: 
   - template: pipelines/stage-elszenvs-template.yaml
     parameters:
