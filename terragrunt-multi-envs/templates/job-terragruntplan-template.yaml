@@ -69,7 +69,7 @@ jobs:
         inputs: 
           targetType: inline
           script: |
-            #cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
+            cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json 
             checkov -f plan.json
         env:
