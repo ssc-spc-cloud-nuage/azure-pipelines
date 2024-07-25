@@ -59,7 +59,7 @@ stages:
               if [ ! -f $HOME/.local/bin/checkov ]; then
                 sudo apt install python3-pip -y
                 pip3 install checkov
-                $HOME/.local/bin/checkov
+                echo 'export PATH=$HOME/.local/bin:$PATH' >> ~/.profile
               fi
             
             displayName: 'Install Checkov'
