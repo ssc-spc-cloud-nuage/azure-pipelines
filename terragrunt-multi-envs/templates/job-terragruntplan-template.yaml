@@ -71,7 +71,7 @@ jobs:
           script: |
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json 
-            checkov -f plan.json
+            checkov -f plan.json --quiet
         env:
           ARM_CLIENT_ID: $(ARMClient)
           ARM_TENANT_ID: $(TenantID)
