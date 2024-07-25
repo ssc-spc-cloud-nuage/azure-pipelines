@@ -55,6 +55,16 @@ stages:
             
             displayName: 'install terraform/terragrunt'
 
+          - bash: |
+              if [ ! -f $HOME/.local/bin/checkov ]; then
+                sudo apt install python3-pip -y
+                pip3 install checkov
+                $HOME/.local/bin/checkov
+              fi
+            
+            displayName: 'Install Checkov'
+
+
       - template: /terragrunt-multi-envs/templates/job-terragruntplan-template.yaml@templates
         parameters:
           serviceConnection: ${{ eslzEnv.serviceConnection }}
