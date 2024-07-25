@@ -34,6 +34,20 @@ jobs:
 
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt init
+      
+      - task: bash@3
+        name: TerragruntValidate
+        inputs:
+          targetType: inline
+          script: |
+            cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
+            terragrunt validate
+        env:
+          ARM_CLIENT_ID: $(ARMClient)
+          ARM_TENANT_ID: $(TenantID)
+          ARM_SUBSCRIPTION_ID: $(SubID)
+          ARM_OIDC_TOKEN: $(OIDCToken)
+          ARM_USE_OIDC: true
 
       - task: bash@3
         name: TerragruntPlan
