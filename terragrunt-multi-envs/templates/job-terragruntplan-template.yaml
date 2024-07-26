@@ -5,9 +5,9 @@ parameters:
     type: string
   - name: eslzEnvFolder
     type: string
-  - name: checkov-skip-checks
+  - name: checkovSkipChecks
     type: string
-    default: 'CKV_SECRET_3,CKV2_AZURE_1,CKV2_AZURE_33,CKV_AZURE_33,CKV2_AZURE_38'
+    values: 'CKV_SECRET_3,CKV2_AZURE_1,CKV2_AZURE_33,CKV_AZURE_33,CKV2_AZURE_38'
 
 
 jobs:
@@ -74,7 +74,7 @@ jobs:
           script: |
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json 
-            checkov -f plan.json -skip-check ${{ parameters.checkov-skip-checks }} --quiet
+            checkov -f plan.json -skip-check ${{ parameters.checkovSkipChecks }} --quiet
         env:
           ARM_CLIENT_ID: $(ARMClient)
           ARM_TENANT_ID: $(TenantID)
