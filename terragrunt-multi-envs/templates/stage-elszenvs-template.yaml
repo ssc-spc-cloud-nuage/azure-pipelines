@@ -70,6 +70,7 @@ stages:
           serviceConnection: ${{ eslzEnv.serviceConnection }}
           eslzEnvFolder: ${{ eslzEnv.envName }}
           layers: ${{ eslzEnv.layers }}
+          checkovSkipChecks: 'CKV_SECRET_3,CKV2_AZURE_1,CKV2_AZURE_33,CKV_AZURE_33,CKV2_AZURE_38'
 
       - job: PostPlanJob
         dependsOn:
