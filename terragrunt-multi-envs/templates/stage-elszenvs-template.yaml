@@ -1,7 +1,8 @@
 parameters:
   - name: eslzEnvs
     type: object
-
+  - name: checkovSkipChecks
+    type: string
 stages: 
 - ${{ each eslzEnv in parameters.eslzEnvs }}:  
   - stage: ${{ eslzEnv.envName }}_Plan
@@ -70,7 +71,7 @@ stages:
           serviceConnection: ${{ eslzEnv.serviceConnection }}
           eslzEnvFolder: ${{ eslzEnv.envName }}
           layers: ${{ eslzEnv.layers }}
-          checkovSkipChecks: 'CKV_SECRET_3,CKV2_AZURE_1,CKV2_AZURE_33,CKV_AZURE_33,CKV2_AZURE_38'
+          checkovSkipChecks: ${{ checkovSkipChecks }}
 
       - job: PostPlanJob
         dependsOn:
