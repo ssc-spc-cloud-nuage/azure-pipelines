@@ -71,7 +71,7 @@ stages:
           serviceConnection: ${{ eslzEnv.serviceConnection }}
           eslzEnvFolder: ${{ eslzEnv.envName }}
           layers: ${{ eslzEnv.layers }}
-          checkovSkipChecks: ${{ checkovSkipChecks }}
+          checkovSkipChecks: ${{ parameters.checkovSkipChecks }}
 
       - job: PostPlanJob
         dependsOn:
