@@ -7,7 +7,7 @@ parameters:
     type: string
   - name: checkov-skip-checks
     type: string
-    values: "CKV_SECRET_3,CKV2_AZURE_1,CKV2_AZURE_33,CKV_AZURE_33,CKV2_AZURE_38"
+    values: 'CKV_SECRET_3,CKV2_AZURE_1,CKV2_AZURE_33,CKV_AZURE_33,CKV2_AZURE_38'
 
 
 jobs:
