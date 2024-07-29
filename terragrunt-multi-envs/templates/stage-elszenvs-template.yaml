@@ -76,6 +76,7 @@ stages:
 
       - job: PostPlanJob
         dependsOn:
+        - InitJob
         - ${{ each layer in eslzEnv.layers }}:
           - TerragruntPlan_${{ eslzEnv.envName }}_${{ layer }}
         condition: always()
