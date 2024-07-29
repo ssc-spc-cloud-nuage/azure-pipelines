@@ -13,12 +13,9 @@ jobs:
 - ${{ each layer in parameters.layers }}:  
   - deployment: TerragruntApply_${{ parameters.eslzEnvFolder}}_${{ layer }}
     condition: and(succeeded(), eq(stageDependencies.${{ parameters.eslzEnvFolder}}_Plan.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
-    dependsOn: 
-    - InitJob
-    - PostPlanJob
     environment: ${{ parameters.eslzEnvFolder}}
     variables:
-      AgentName: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
+      AgentName: $[ stageDependencies.${{ parameters.eslzEnvFolder }}_Plan.InitJob.outputs['TFTGInstall.JobAgentName'] ]
     pool: 
       name: ${{ parameters.eslzEnvPool }}
       demands: Agent.Name -equals $(AgentName)
