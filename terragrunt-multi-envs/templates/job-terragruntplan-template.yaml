@@ -17,8 +17,8 @@ jobs:
     dependsOn: InitJob
     condition: and(succeeded(), eq(dependencies.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
     pool: 
-      name: ${{ eslzEnvPool }}
-    demands:
+      name: ${{ parameters.eslzEnvPool }}
+      demands:
       - Agent.Name -equals dependencies.InitJob.outputs['TFTGInstall.JobAgentName']
     steps:
       - task: AzureCLI@2
