@@ -6,9 +6,9 @@ parameters:
 stages: 
 - ${{ each eslzEnv in parameters.eslzEnvs }}:  
   - stage: ${{ eslzEnv.envName }}_Plan
-    pool: ${{ eslzEnv.pool }}
     jobs:
       - job: InitJob
+        pool: ${{ eslzEnv.pool }}
         steps:
           - checkout: none
           - bash: |
@@ -31,7 +31,6 @@ stages:
                       echo "##vso[task.setvariable variable=RepoChange$layername;isOutput=true]false"
                   fi
               done
-
             name: GitDiffTask
             failOnStderr: True
             env:
@@ -52,9 +51,10 @@ stages:
               $(Agent.ToolsDirectory)/.tgenv/bin/tgenv use latest
               fi
 
-              #curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash 
+              echo "##vso[task.setvariable variable=JobAgentName;isOutput=true]$(Agent.Name)"
             
             displayName: 'install terraform/terragrunt'
+            name: TFTGInstall
 
           - bash: |
               if [ ! -f $HOME/.local/bin/checkov ]; then
@@ -72,6 +72,7 @@ stages:
           eslzEnvFolder: ${{ eslzEnv.envName }}
           layers: ${{ eslzEnv.layers }}
           checkovSkipChecks: ${{ parameters.checkovSkipChecks }}
+          eslzEnvPool: ${{ eslzEnv.pool }}
 
       - job: PostPlanJob
         dependsOn:
@@ -116,3 +117,4 @@ stages:
           serviceConnection: ${{ eslzEnv.serviceConnection }}
           eslzEnvFolder: ${{ eslzEnv.envName }}
           layers: ${{ eslzEnv.layers }}
+          eslzEnvPool: ${{ eslzEnv.pool }}

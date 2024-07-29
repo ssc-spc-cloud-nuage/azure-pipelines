@@ -7,6 +7,8 @@ parameters:
     type: string
   - name: checkovSkipChecks
     type: string
+  - name: eslzEnvPool
+    type: string
 
 
 jobs:
@@ -14,6 +16,10 @@ jobs:
   - job: TerragruntPlan_${{ parameters.eslzEnvFolder}}_${{ layer }}
     dependsOn: InitJob
     condition: and(succeeded(), eq(dependencies.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
+    pool: 
+      name: ${{ eslzEnvPool }}
+    demands:
+      - Agent.Name -equals dependencies.InitJob.outputs['TFTGInstall.JobAgentName']
     steps:
       - task: AzureCLI@2
         name: TerragruntInit
