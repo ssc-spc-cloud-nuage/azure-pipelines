@@ -15,8 +15,8 @@ jobs:
     condition: and(succeeded(), eq(stageDependencies.${{ parameters.eslzEnvFolder}}_Plan.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
     environment: ${{ parameters.eslzEnvFolder}}
     pool: 
-      name: ${{ eslzEnvPool }}
-    demands:
+      name: ${{ parameters.eslzEnvPool }}
+      demands:
       - Agent.Name -equals dependencies.InitJob.outputs['TFTGInstall.JobAgentName']
     strategy:
       runOnce:
