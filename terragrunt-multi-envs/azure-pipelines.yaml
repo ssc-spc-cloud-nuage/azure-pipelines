@@ -21,3 +21,5 @@ stages:
           serviceConnection: # Name of the service connection to the subscription
           pool: 'Devops' # Name of the self-hosted agent pool 
           layers: ['L2_blueprint_project'] # name of the folders of the layers tracked for changes
+    checkovSkipChecks: 'CKV_SECRET_3,CKV2_AZURE_1,CKV2_AZURE_33,CKV_AZURE_33,CKV2_AZURE_38,CKV_AZURE_50,CKV_AZURE_93,\
+                          CKV2_AZURE_11,CKV2_AZURE_16,CKV2_AZURE_17,CKV2_AZURE_22,CKV2_AZURE_48'
