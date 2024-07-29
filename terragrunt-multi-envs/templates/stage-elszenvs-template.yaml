@@ -82,7 +82,7 @@ stages:
         variables:
           AgentName: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
         pool: 
-          name: ${{ parameters.eslzEnvPool }}
+          name: ${{ eslzEnv.pool }}
           demands: Agent.Name -equals $(AgentName)
         steps:
           - checkout: none
