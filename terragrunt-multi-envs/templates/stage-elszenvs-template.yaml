@@ -83,7 +83,7 @@ stages:
           AgentName: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
         pool: 
           name: ${{ eslzEnv.pool }}
-          demands: Agent.Name -equals $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
+          demands: Agent.Name -equals $(AgentName)
         steps:
           - checkout: none
           - task: DownloadBuildArtifacts@1
