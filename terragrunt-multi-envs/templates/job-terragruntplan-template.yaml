@@ -16,10 +16,11 @@ jobs:
   - job: TerragruntPlan_${{ parameters.eslzEnvFolder}}_${{ layer }}
     dependsOn: InitJob
     condition: and(succeeded(), eq(dependencies.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
+    variables:
+      AgentName: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
     pool: 
       name: ${{ parameters.eslzEnvPool }}
-      demands:
-      - Agent.Name -equals dependencies.InitJob.outputs['TFTGInstall.JobAgentName']
+      demands: Agent.Name -equals $(AgentName)
     steps:
       - task: AzureCLI@2
         name: TerragruntInit
