@@ -78,12 +78,12 @@ stages:
         dependsOn:
         - ${{ each layer in eslzEnv.layers }}:
           - TerragruntPlan_${{ eslzEnv.envName }}_${{ layer }}
+        condition: always()
         variables:
           AgentName: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
         pool: 
           name: ${{ parameters.eslzEnvPool }}
           demands: Agent.Name -equals $(AgentName)
-        condition: always()
         steps:
           - checkout: none
           - task: DownloadBuildArtifacts@1
