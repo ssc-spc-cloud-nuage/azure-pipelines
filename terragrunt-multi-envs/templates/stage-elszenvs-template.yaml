@@ -116,10 +116,10 @@ stages:
   - stage: ${{ eslzEnv.envName }}_Apply
     # pool: ${{ eslzEnv.pool }}
     variables:
-      AgentName: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
+      randomtext: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
     pool: 
       name: ${{ eslzEnv.pool }}
-      demands: Agent.Name -equals "$[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]"
+      demands: Agent.Name -equals $(randomtext)
     dependsOn: ${{ eslzEnv.envName }}_Plan
     condition: and(succeeded(), eq(dependencies.${{ eslzEnv.envName }}_Plan.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange'], 'true'))
     jobs:
