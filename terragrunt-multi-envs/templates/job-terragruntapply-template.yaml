@@ -32,6 +32,8 @@ jobs:
                 $(Agent.ToolsDirectory)/.tgenv/bin/tgenv install latest
                 $(Agent.ToolsDirectory)/.tgenv/bin/tgenv use latest
                 fi
+
+                source ~/.profile
             
               displayName: 'install terraform/terragrunt'
 
