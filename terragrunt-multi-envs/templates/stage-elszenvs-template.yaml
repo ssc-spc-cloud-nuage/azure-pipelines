@@ -81,7 +81,8 @@ stages:
           - TerragruntPlan_${{ eslzEnv.envName }}_${{ layer }}
         condition: always()
         variables:
-          AgentName: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
+          # AgentName: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
+            AgentName: $[ stageDependencies.${{ eslzEnv.envName }}_Plan.InitJob.outputs['TFTGInstall.JobAgentName']
         pool: 
           name: ${{ eslzEnv.pool }}
           demands: Agent.Name -equals $(AgentName)
@@ -116,10 +117,10 @@ stages:
   - stage: ${{ eslzEnv.envName }}_Apply
     # pool: ${{ eslzEnv.pool }}
     variables:
-      randomtext: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
+      AgentName: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
     pool: 
       name: ${{ eslzEnv.pool }}
-      demands: Agent.Name -equals $(randomtext)
+      demands: Agent.Name -equals $(AgentName)
     dependsOn: ${{ eslzEnv.envName }}_Plan
     condition: and(succeeded(), eq(dependencies.${{ eslzEnv.envName }}_Plan.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange'], 'true'))
     jobs:
