@@ -82,7 +82,7 @@ stages:
         condition: always()
         variables:
           # AgentName: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
-            AgentName: $[ stageDependencies.${{ eslzEnv.envName }}_Plan.InitJob.outputs['TFTGInstall.JobAgentName']
+            AgentName: $[ stageDependencies.${{ eslzEnv.envName }}_Plan.InitJob.outputs['TFTGInstall.JobAgentName'] ]
         pool: 
           name: ${{ eslzEnv.pool }}
           demands: Agent.Name -equals $(AgentName)
