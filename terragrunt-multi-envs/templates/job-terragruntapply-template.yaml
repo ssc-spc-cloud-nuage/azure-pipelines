@@ -33,7 +33,7 @@ jobs:
                 $(Agent.ToolsDirectory)/.tgenv/bin/tgenv use latest
                 fi
             
-            displayName: 'install terraform/terragrunt'
+              displayName: 'install terraform/terragrunt'
 
             - task: DownloadBuildArtifacts@1
               name: DownloadPlan
