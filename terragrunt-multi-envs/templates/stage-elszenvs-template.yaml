@@ -119,7 +119,7 @@ stages:
       AgentName: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
     pool: 
       name: ${{ eslzEnv.pool }}
-      demands: Agent.Name -equals vmsslin-00000C
+      demands: Agent.Name -equals '$(AgentName)'
     dependsOn: ${{ eslzEnv.envName }}_Plan
     condition: and(succeeded(), eq(dependencies.${{ eslzEnv.envName }}_Plan.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange'], 'true'))
     jobs:
