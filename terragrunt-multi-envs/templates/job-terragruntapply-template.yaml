@@ -16,9 +16,9 @@ jobs:
     environment: ${{ parameters.eslzEnvFolder}}
     variables:
       AgentName: $[ stageDependencies.${{ parameters.eslzEnvFolder }}_Plan.InitJob.outputs['TFTGInstall.JobAgentName'] ]
-    pool: 
-      name: ${{ parameters.eslzEnvPool }}
-      demands: Agent.Name -equals $(AgentName)
+    # pool: 
+    #   name: ${{ parameters.eslzEnvPool }}
+    #   demands: Agent.Name -equals $(AgentName)
     strategy:
       runOnce:
         deploy:
@@ -43,6 +43,9 @@ jobs:
                   export ARM_TENANT_ID=$tenantId
                   export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
                   export ARM_USE_OIDC=true
+
+                  echo $(AgentName)
+                  echo '$[ stageDependencies.${{ parameters.eslzEnvFolder }}_Plan.InitJob.outputs['TFTGInstall.JobAgentName'] ]'
 
                   cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
                   terragrunt apply -auto-approve $(Agent.TempDirectory)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan
