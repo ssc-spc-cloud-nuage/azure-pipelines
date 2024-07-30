@@ -18,6 +18,23 @@ jobs:
       runOnce:
         deploy:
           steps:
+            - bash: |
+              if [ ! -d "$(Agent.ToolsDirectory)/.tfenv" ]; then
+              git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tfenv.git $(Agent.ToolsDirectory)/.tfenv
+              echo 'export PATH=$(Agent.ToolsDirectory)/.tfenv/bin:$PATH' >> ~/.profile
+              $(Agent.ToolsDirectory)/.tfenv/bin/tfenv install 1.5.5
+              $(Agent.ToolsDirectory)/.tfenv/bin/tfenv use 1.5.5
+              fi
+
+              if [ ! -d "$(Agent.ToolsDirectory)/.tgenv" ]; then
+              git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tgenv.git $(Agent.ToolsDirectory)/.tgenv
+              echo 'export PATH=$(Agent.ToolsDirectory)/.tgenv/bin:$PATH' >> ~/.profile
+              $(Agent.ToolsDirectory)/.tgenv/bin/tgenv install latest
+              $(Agent.ToolsDirectory)/.tgenv/bin/tgenv use latest
+              fi
+            
+            displayName: 'install terraform/terragrunt'
+
             - task: DownloadBuildArtifacts@1
               name: DownloadPlan
               inputs:
@@ -38,9 +55,6 @@ jobs:
                   export ARM_TENANT_ID=$tenantId
                   export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
                   export ARM_USE_OIDC=true
-
-                  echo $(AgentName)
-                  echo '$[ stageDependencies.${{ parameters.eslzEnvFolder }}_Plan.InitJob.outputs['TFTGInstall.JobAgentName'] ]'
 
                   cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
                   terragrunt apply -auto-approve $(Agent.TempDirectory)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan
