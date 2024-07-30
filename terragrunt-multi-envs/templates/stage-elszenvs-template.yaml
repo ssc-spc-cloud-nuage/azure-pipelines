@@ -125,9 +125,9 @@ stages:
     condition: and(succeeded(), eq(dependencies.${{ eslzEnv.envName }}_Plan.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange'], 'true'))
     jobs:
       - job:
-          steps: 
-          - bash: |
-              echo 'Hello world'
+        steps: 
+        - bash: |
+            echo 'Hello world'
       - template: /terragrunt-multi-envs/templates/job-terragruntapply-template.yaml@templates
         parameters:
           serviceConnection: ${{ eslzEnv.serviceConnection }}
