@@ -116,17 +116,20 @@ stages:
   - stage: ${{ eslzEnv.envName }}_Apply
     #pool: ${{ eslzEnv.pool }}
     variables:
-      AgentName1: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
+    #  AgentName1: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
       AgentName2: $[ stageDependencies.${{ eslzEnv.envName }}_Plan.InitJob.outputs['TFTGInstall.JobAgentName'] ]
-      AgentName3: $[ dependencies.${{ eslzEnv.envName }}_Plan.outputs['InitJob.TFTGInstall.JobAgentName'] ]
-      AgentName4: $(dependencies.${{ eslzEnv.envName }}_Plan.outputs['InitJob.TFTGInstall.JobAgentName'])
+    #  AgentName3: $[ dependencies.${{ eslzEnv.envName }}_Plan.outputs['InitJob.TFTGInstall.JobAgentName'] ]
+    #  AgentName4: $(dependencies.${{ eslzEnv.envName }}_Plan.outputs['InitJob.TFTGInstall.JobAgentName'])
     pool: 
       name: ${{ eslzEnv.pool }}
-      demands: Agent.Name -equals $(dependencies.${{ eslzEnv.envName }}_Plan.outputs['InitJob.TFTGInstall.JobAgentName'])
+      demands: Agent.Name -equals $(AgentName2)
     dependsOn: ${{ eslzEnv.envName }}_Plan
     condition: and(succeeded(), eq(dependencies.${{ eslzEnv.envName }}_Plan.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange'], 'true'))
     jobs:
       - job:
+        pool: 
+          name: ${{ eslzEnv.pool }}
+          demands: Agent.Name -equals $(AgentName2)
         steps: 
         - bash: |
             echo 'Hello world'
