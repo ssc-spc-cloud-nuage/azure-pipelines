@@ -123,13 +123,6 @@ stages:
     dependsOn: ${{ eslzEnv.envName }}_Plan
     condition: and(succeeded(), eq(dependencies.${{ eslzEnv.envName }}_Plan.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange'], 'true'))
     jobs:
-      - job:
-        pool: 
-          name: ${{ eslzEnv.pool }}
-          demands: Agent.Name -equals $(AgentName2)
-        steps: 
-        - bash: |
-            echo 'Hello world'
       - template: /terragrunt-multi-envs/templates/job-terragruntapply-template.yaml@templates
         parameters:
           serviceConnection: ${{ eslzEnv.serviceConnection }}
