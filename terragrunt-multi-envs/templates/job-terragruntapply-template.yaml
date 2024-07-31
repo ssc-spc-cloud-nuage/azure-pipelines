@@ -16,9 +16,9 @@ jobs:
     environment: ${{ parameters.eslzEnvFolder}}
     pool: 
       name: ${{ parameters.eslzEnvPool}}
-      demands: 
-      - terragrunt
-      - terraform
+      # demands: 
+      # - terragrunt
+      # - terraform
     strategy:
       runOnce:
         deploy:
