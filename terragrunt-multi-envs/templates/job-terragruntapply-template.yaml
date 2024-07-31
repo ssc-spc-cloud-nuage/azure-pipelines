@@ -21,7 +21,7 @@ jobs:
         deploy:
           steps:
             - download: none
-            - checkout: self
+            # - checkout: self
             - bash: |
                 if [ ! -d "$(Agent.ToolsDirectory)/.tfenv" ]; then
                 git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tfenv.git $(Agent.ToolsDirectory)/.tfenv
@@ -40,6 +40,13 @@ jobs:
                 source ~/.profile
             
               displayName: 'install terraform/terragrunt'
+            - task: DownloadBuildArtifacts@1
+              name: DownloadTF
+              inputs:
+                buildType: current
+                downloadType: single
+                artifactName: tf_${{ parameters.eslzEnvFolder}}_${{ layer }}
+                downloadPath: '$(Build.SourcesDirectory)'
             - task: DownloadBuildArtifacts@1
               name: DownloadPlan
               inputs:
