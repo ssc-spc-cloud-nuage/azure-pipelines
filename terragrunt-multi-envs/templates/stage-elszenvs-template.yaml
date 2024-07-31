@@ -12,6 +12,9 @@ stages:
         steps:
           - checkout: none
           - bash: |
+              sudo apt-get install jq -y
+          name: InstallPackages
+          - bash: |
               if [[ $(Build.Reason) == "PullRequest" ]]; then
                   sourceBranch=$(echo $(System.PullRequest.SourceBranch) | sed 's|refs/heads/||')
                   echo "PullRequest build triggered from $sourceBranch"
