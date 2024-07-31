@@ -13,6 +13,7 @@ stages:
           - checkout: none
           - bash: |
               sudo apt-get install jq -y
+              sudo apt-get install unzip -y
               curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
             name: InstallPackages
           - bash: |
@@ -124,6 +125,10 @@ stages:
     dependsOn: ${{ eslzEnv.envName }}_Plan
     condition: and(succeeded(), eq(dependencies.${{ eslzEnv.envName }}_Plan.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange'], 'true'))
     jobs:
+      - job:
+          steps: 
+          - bash: |
+              echo 'Hello world'
       - template: /terragrunt-multi-envs/templates/job-terragruntapply-template.yaml@templates
         parameters:
           serviceConnection: ${{ eslzEnv.serviceConnection }}
