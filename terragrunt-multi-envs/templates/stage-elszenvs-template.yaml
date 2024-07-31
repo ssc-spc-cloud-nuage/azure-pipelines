@@ -13,6 +13,7 @@ stages:
           - checkout: none
           - bash: |
               sudo apt-get install jq -y
+              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
             name: InstallPackages
           - bash: |
               if [[ $(Build.Reason) == "PullRequest" ]]; then
