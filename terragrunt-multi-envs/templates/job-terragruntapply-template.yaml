@@ -15,8 +15,8 @@ jobs:
     condition: and(succeeded(), eq(stageDependencies.${{ parameters.eslzEnvFolder}}_Plan.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
     environment: ${{ parameters.eslzEnvFolder}}
     pool: 
-      name: 'Devops'
-      demands: Agent.Name -equals $(AgentName2)
+      name: ${{ parameters.eslzEnvPool}}
+#      demands: Agent.Name -equals $(AgentName)
     strategy:
       runOnce:
         deploy:
