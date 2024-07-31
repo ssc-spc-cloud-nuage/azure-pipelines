@@ -14,13 +14,12 @@ jobs:
   - deployment: TerragruntApply_${{ parameters.eslzEnvFolder}}_${{ layer }}
     condition: and(succeeded(), eq(stageDependencies.${{ parameters.eslzEnvFolder}}_Plan.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
     environment: ${{ parameters.eslzEnvFolder}}
+    pool: 
+      name: 'Devops'
+      demands: Agent.Name -equals $(AgentName2)
     strategy:
       runOnce:
         deploy:
-          pool: 
-            name: 'Devops'
-            demands: 
-              - Agent.Name -equals $(AgentName2)
           steps:
             - download: none
             - checkout: self
