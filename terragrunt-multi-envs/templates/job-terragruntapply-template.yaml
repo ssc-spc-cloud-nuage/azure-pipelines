@@ -17,6 +17,9 @@ jobs:
     strategy:
       runOnce:
         deploy:
+          pool: 
+            name: ${{ eslzEnv.pool }}
+            demands: Agent.Name -equals $(AgentName2)
           steps:
             - download: none
             - checkout: self
