@@ -97,7 +97,7 @@ stages:
             inputs:
               buildType: current
               downloadType: specific
-              itemPattern: plan_*.txt
+              itemPattern: */plan*.txt
               downloadPath: '$(Agent.TempDirectory)'
           - bash: |
               # echo "##vso[task.setvariable variable=PlanChange;isOutput=true]false"
