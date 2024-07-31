@@ -125,12 +125,9 @@ jobs:
           PathtoPublish: $(Build.ArtifactStagingDirectory)
           ArtifactName: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
       
-      # - task: PublishBuildArtifacts@1
-      #   name: PublishTF
-      #   inputs:
-      #     PathtoPublish: $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
-      #     ArtifactName: tf_${{ parameters.eslzEnvFolder }}_${{ layer }}
-      - bash: |
-          pwd
-          ls -la $(Build.SourcesDirectory)
-        name: Testing
+      - task: PublishBuildArtifacts@1
+        name: PublishTF
+        inputs:
+          PathtoPublish: $(Build.SourcesDirectory)
+          ArtifactName: tf_${{ parameters.eslzEnvFolder }}_${{ layer }}
+      
