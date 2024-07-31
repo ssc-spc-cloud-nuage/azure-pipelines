@@ -18,6 +18,7 @@ jobs:
       runOnce:
         deploy:
           steps:
+            - download: none
             - checkout: self
             - bash: |
                 if [ ! -d "$(Agent.ToolsDirectory)/.tfenv" ]; then
