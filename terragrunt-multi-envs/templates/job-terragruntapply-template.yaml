@@ -21,7 +21,6 @@ jobs:
         deploy:
           steps:
             - download: none
-            # - checkout: self
             - bash: |
                 if [ ! -d "$(Agent.ToolsDirectory)/.tfenv" ]; then
                 git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tfenv.git $(Agent.ToolsDirectory)/.tfenv
