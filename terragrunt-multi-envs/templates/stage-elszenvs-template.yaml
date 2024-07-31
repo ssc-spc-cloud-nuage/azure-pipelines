@@ -116,9 +116,10 @@ stages:
   - stage: ${{ eslzEnv.envName }}_Apply
     #pool: ${{ eslzEnv.pool }}
     variables:
-    #  AgentName: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
-    #  AgentName: $[ stageDependencies.${{ eslzEnv.envName }}_Plan.InitJob.outputs['TFTGInstall.JobAgentName'] ]
-      AgentNamee: $[ dependencies.${{ eslzEnv.envName }}_Plan.outputs['InitJob.TFTGInstall.JobAgentName'] ]
+      AgentName1: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
+      AgentName2: $[ stageDependencies.${{ eslzEnv.envName }}_Plan.InitJob.outputs['TFTGInstall.JobAgentName'] ]
+      AgentName3: $[ dependencies.${{ eslzEnv.envName }}_Plan.outputs['InitJob.TFTGInstall.JobAgentName'] ]
+      AgentName4: $(dependencies.${{ eslzEnv.envName }}_Plan.outputs['InitJob.TFTGInstall.JobAgentName'])
     pool: 
       name: ${{ eslzEnv.pool }}
       demands: Agent.Name -equals $(dependencies.${{ eslzEnv.envName }}_Plan.outputs['InitJob.TFTGInstall.JobAgentName'])
