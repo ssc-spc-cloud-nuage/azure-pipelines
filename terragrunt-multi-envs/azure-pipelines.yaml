@@ -11,15 +11,16 @@ resources:
     - repository: templates
       type: github
       name: ssc-spc-cloud-nuage/azure-pipelines
-      ref: refs/tags/v1.0.0
+      ref: refs/tags/v1.0.1
       endpoint: 'gh-ssc-spc-cloud-nuage-sc'
 stages: 
   - template: pipelines/stage-elszenvs-template.yaml
     parameters:
-      eslzEnvs:
-        - envName: 'dev' # Name of the folder of the environment
-          serviceConnection: # Name of the service connection to the subscription
-          pool: 'Devops' # Name of the self-hosted agent pool 
-          layers: ['L2_blueprint_project'] # name of the folders of the layers tracked for changes
       checkovSkipChecks: 'CKV_SECRET_3,CKV2_AZURE_1,CKV2_AZURE_33,CKV_AZURE_33,CKV2_AZURE_38,CKV_AZURE_50,CKV_AZURE_93,\
                           CKV2_AZURE_11,CKV2_AZURE_16,CKV2_AZURE_17,CKV2_AZURE_22,CKV2_AZURE_48'
+      eslzEnvs:
+        - envName: 'dev' # Required. Name of the folder of the environment
+          serviceConnection: # Required. Name of the service connection to the subscription
+          pool: 'Devops' # Required. Name of the self-hosted agent pool 
+          layers: ['L2_blueprint_project'] # Required. name of the folders of the layers tracked for changes
+          multiRunID: "" # Optional. Id of the run if the same env is defined multiple times
