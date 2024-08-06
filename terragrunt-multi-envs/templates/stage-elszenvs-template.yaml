@@ -12,6 +12,11 @@ stages:
         steps:
           - checkout: none
           - bash: |
+              sudo apt-get install jq -y
+              sudo apt-get install unzip -y
+              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+            name: InstallPackages
+          - bash: |
               if [[ $(Build.Reason) == "PullRequest" ]]; then
                   sourceBranch=$(echo $(System.PullRequest.SourceBranch) | sed 's|refs/heads/||')
                   echo "PullRequest build triggered from $sourceBranch"
@@ -76,9 +81,15 @@ stages:
 
       - job: PostPlanJob
         dependsOn:
+        - InitJob
         - ${{ each layer in eslzEnv.layers }}:
           - TerragruntPlan_${{ eslzEnv.envName }}_${{ layer }}
         condition: always()
+        variables:
+          AgentName: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
+        pool: 
+          name: ${{ eslzEnv.pool }}
+          demands: Agent.Name -equals $(AgentName)
         steps:
           - checkout: none
           - task: DownloadBuildArtifacts@1
@@ -86,6 +97,7 @@ stages:
             inputs:
               buildType: current
               downloadType: specific
+              itemPattern: "*/plan*.txt"
               downloadPath: '$(Agent.TempDirectory)'
           - bash: |
               # echo "##vso[task.setvariable variable=PlanChange;isOutput=true]false"
@@ -109,6 +121,8 @@ stages:
               
   - stage: ${{ eslzEnv.envName }}_Apply
     pool: ${{ eslzEnv.pool }}
+    variables:
+      AgentName2: $[ stageDependencies.${{ eslzEnv.envName }}_Plan.InitJob.outputs['TFTGInstall.JobAgentName'] ]
     dependsOn: ${{ eslzEnv.envName }}_Plan
     condition: and(succeeded(), eq(dependencies.${{ eslzEnv.envName }}_Plan.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange'], 'true'))
     jobs:
