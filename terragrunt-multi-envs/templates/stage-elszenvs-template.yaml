@@ -124,8 +124,10 @@ stages:
     pool: ${{ eslzEnv.pool }}
     variables:
       AgentName2: $[ stageDependencies.${{ eslzEnv.envName }}_Plan${{ eslzEnv.multiRunID }}.InitJob.outputs['TFTGInstall.JobAgentName'] ]
+      PostPlanChange: dependencies.${{ eslzEnv.envName }}_Plan${{ eslzEnv.multiRunID }}.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange']
     dependsOn: ${{ eslzEnv.envName }}_Plan${{ eslzEnv.multiRunID }}
-    condition: and(succeeded(), eq(dependencies.${{ eslzEnv.envName }}_Plan${{ eslzEnv.multiRunID }}.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange'], 'true'))
+    #condition: and(succeeded(), eq(dependencies.${{ eslzEnv.envName }}_Plan${{ eslzEnv.multiRunID }}.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange'], 'true'))
+    condition: and(succeeded(), eq($(PostPlanChange), 'true'))
     jobs:
       - job: InitJob
         steps:
