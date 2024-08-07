@@ -132,3 +132,4 @@ stages:
           eslzEnvFolder: ${{ eslzEnv.envName }}
           layers: ${{ eslzEnv.layers }}
           eslzEnvPool: ${{ eslzEnv.pool }}
+          multiRunID: ${{ eslzEnv.multiRunID }}
