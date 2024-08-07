@@ -6,6 +6,7 @@ parameters:
 stages: 
 - ${{ each eslzEnv in parameters.eslzEnvs }}:  
   - stage: ${{ eslzEnv.envName }}_Plan${{ eslzEnv.multiRunID }}
+    condition: always()
     jobs:
       - job: InitJob
         pool: ${{ eslzEnv.pool }}
