@@ -14,7 +14,7 @@ parameters:
 jobs:
 - ${{ each layer in parameters.layers }}:  
   - deployment: TerragruntApply_${{ parameters.eslzEnvFolder}}_${{ layer }}
-    condition: and(succeeded(), eq(stageDependencies.${{ parameters.eslzEnvFolder }}_Plan${{ parameters.multiRunID }}.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
+    condition: and(succeeded(), eq(stageDependencies.${{ parameters.eslzEnvFolder }}_Plan_${{ parameters.multiRunID }}.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
     environment: ${{ parameters.eslzEnvFolder}}
     pool: 
       name: ${{ parameters.eslzEnvPool}}
