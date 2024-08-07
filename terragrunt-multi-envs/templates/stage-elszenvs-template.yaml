@@ -6,6 +6,7 @@ parameters:
 stages: 
 - ${{ each eslzEnv in parameters.eslzEnvs }}:  
   - stage: ${{ eslzEnv.envName }}_Plan_${{ eslzEnv.multiRunID }}
+    dependsOn:
     condition: always()
     jobs:
       - job: InitJob
@@ -120,7 +121,7 @@ stages:
             env:
               LAYERS_JSON: ${{ convertToJson(eslzEnv.layers) }}
               
-  - stage: ${{ eslzEnv.envName }}_Apply${{ eslzEnv.multiRunID }}
+  - stage: ${{ eslzEnv.envName }}_Apply_${{ eslzEnv.multiRunID }}
     pool: ${{ eslzEnv.pool }}
     variables:
       AgentName2: $[ stageDependencies.${{ eslzEnv.envName }}_Plan_${{ eslzEnv.multiRunID }}.InitJob.outputs['TFTGInstall.JobAgentName'] ]
