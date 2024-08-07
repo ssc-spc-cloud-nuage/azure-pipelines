@@ -125,6 +125,7 @@ stages:
     variables:
       AgentName2: $[ stageDependencies.${{ eslzEnv.envName }}_Plan${{ eslzEnv.multiRunID }}.InitJob.outputs['TFTGInstall.JobAgentName'] ]
       PostPlanChange: $[ dependencies.${{ eslzEnv.envName }}_Plan${{ eslzEnv.multiRunID }}.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange'] ]
+      PostPlanChange2: $[ stageDependencies.${{ eslzEnv.envName }}_Plan${{ eslzEnv.multiRunID }}.PostPlanJob.outputs['CheckPlanChangeTask.PlanChange'] ]
     dependsOn: ${{ eslzEnv.envName }}_Plan${{ eslzEnv.multiRunID }}
     #condition: and(succeeded(), eq(dependencies.${{ eslzEnv.envName }}_Plan${{ eslzEnv.multiRunID }}.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange'], 'true'))
     #condition: and(succeeded(), eq($(PostPlanChange), 'true'))
@@ -133,6 +134,7 @@ stages:
         steps:
           - bash: |
               echo "hello world $(PostPlanChange)" 
+              echo "hellow world2 $(PostPlanChange2)"
       # - template: /terragrunt-multi-envs/templates/job-terragruntapply-template.yaml@templates
       #   parameters:
       #     serviceConnection: ${{ eslzEnv.serviceConnection }}
