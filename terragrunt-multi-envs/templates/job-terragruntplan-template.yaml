@@ -35,13 +35,13 @@ jobs:
             export ARM_TENANT_ID=$tenantId
             export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
             export ARM_USE_OIDC=true
+            export PIPELINE_TOKEN=$(az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query "accessToken" --output tsv)
 
             echo "##vso[task.setvariable variable=ARMClient;issecret=true]$ARM_CLIENT_ID"
             echo "##vso[task.setvariable variable=OIDCToken;issecret=true]$ARM_OIDC_TOKEN"
             echo "##vso[task.setvariable variable=SubID;issecret=true]$ARM_SUBSCRIPTION_ID"
             echo "##vso[task.setvariable variable=TenantID;issecret=true]$ARM_TENANT_ID"
-
-            export PIPELINE_TOKEN=$(az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query "accessToken" --output tsv)
+            echo "##vso[task.setvariable variable=pipelineToken;issecret=true]$PIPELINE_TOKEN"
 
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt init
@@ -59,6 +59,7 @@ jobs:
           ARM_SUBSCRIPTION_ID: $(SubID)
           ARM_OIDC_TOKEN: $(OIDCToken)
           ARM_USE_OIDC: true
+          PIPELINE_TOKEN: $(pipelineToken)
 
       - task: bash@3
         name: TerragruntPlan
@@ -74,6 +75,7 @@ jobs:
           ARM_SUBSCRIPTION_ID: $(SubID)
           ARM_OIDC_TOKEN: $(OIDCToken)
           ARM_USE_OIDC: true
+          PIPELINE_TOKEN: $(pipelineToken)
 
       - task: bash@3
         name: Checkov
@@ -89,6 +91,7 @@ jobs:
           ARM_SUBSCRIPTION_ID: $(SubID)
           ARM_OIDC_TOKEN: $(OIDCToken)
           ARM_USE_OIDC: true
+          PIPELINE_TOKEN: $(pipelineToken)
 
 
       - task: bash@3
