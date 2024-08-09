@@ -128,11 +128,6 @@ stages:
     dependsOn: ${{ eslzEnv.envName }}_Plan_${{ eslzEnv.multiRunID }}
     condition: and(succeeded(), eq(dependencies.${{ eslzEnv.envName }}_Plan_${{ eslzEnv.multiRunID }}.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange'], 'true'))
     jobs:
-      # - job: InitJob
-      #   steps:
-      #     - bash: |
-      #         echo "hello world $(PostPlanChange)" 
-      #         echo "hellow world2 $(PostPlanChange2)"
       - template: /terragrunt-multi-envs/templates/job-terragruntapply-template.yaml@templates
         parameters:
           serviceConnection: ${{ eslzEnv.serviceConnection }}
