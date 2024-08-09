@@ -5,7 +5,9 @@ parameters:
     type: string
 stages: 
 - ${{ each eslzEnv in parameters.eslzEnvs }}:  
-  - stage: ${{ eslzEnv.envName }}_Plan
+  - stage: ${{ eslzEnv.envName }}_Plan_${{ eslzEnv.multiRunID }}
+    dependsOn:
+    condition: always()
     jobs:
       - job: InitJob
         pool: ${{ eslzEnv.pool }}
@@ -119,12 +121,12 @@ stages:
             env:
               LAYERS_JSON: ${{ convertToJson(eslzEnv.layers) }}
               
-  - stage: ${{ eslzEnv.envName }}_Apply
+  - stage: ${{ eslzEnv.envName }}_Apply_${{ eslzEnv.multiRunID }}
     pool: ${{ eslzEnv.pool }}
     variables:
-      AgentName2: $[ stageDependencies.${{ eslzEnv.envName }}_Plan.InitJob.outputs['TFTGInstall.JobAgentName'] ]
-    dependsOn: ${{ eslzEnv.envName }}_Plan
-    condition: and(succeeded(), eq(dependencies.${{ eslzEnv.envName }}_Plan.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange'], 'true'))
+      AgentName2: $[ stageDependencies.${{ eslzEnv.envName }}_Plan_${{ eslzEnv.multiRunID }}.InitJob.outputs['TFTGInstall.JobAgentName'] ]
+    dependsOn: ${{ eslzEnv.envName }}_Plan_${{ eslzEnv.multiRunID }}
+    condition: and(succeeded(), eq(dependencies.${{ eslzEnv.envName }}_Plan_${{ eslzEnv.multiRunID }}.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange'], 'true'))
     jobs:
       - template: /terragrunt-multi-envs/templates/job-terragruntapply-template.yaml@templates
         parameters:
@@ -132,3 +134,4 @@ stages:
           eslzEnvFolder: ${{ eslzEnv.envName }}
           layers: ${{ eslzEnv.layers }}
           eslzEnvPool: ${{ eslzEnv.pool }}
+          multiRunID: ${{ eslzEnv.multiRunID }}

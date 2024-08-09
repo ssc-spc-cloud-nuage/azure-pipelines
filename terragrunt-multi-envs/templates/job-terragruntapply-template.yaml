@@ -7,12 +7,14 @@ parameters:
     type: string
   - name: eslzEnvPool
     type: string
+  - name: multiRunID
+    type: string
 
 
 jobs:
 - ${{ each layer in parameters.layers }}:  
   - deployment: TerragruntApply_${{ parameters.eslzEnvFolder}}_${{ layer }}
-    condition: and(succeeded(), eq(stageDependencies.${{ parameters.eslzEnvFolder}}_Plan.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
+    condition: and(succeeded(), eq(stageDependencies.${{ parameters.eslzEnvFolder }}_Plan_${{ parameters.multiRunID }}.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
     environment: ${{ parameters.eslzEnvFolder}}
     pool: 
       name: ${{ parameters.eslzEnvPool}}
@@ -66,6 +68,7 @@ jobs:
                   export ARM_TENANT_ID=$tenantId
                   export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
                   export ARM_USE_OIDC=true
+                  export PIPELINE_TOKEN=$(az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query "accessToken" --output tsv)
 
                   cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
                   terragrunt apply -auto-approve $(Agent.TempDirectory)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan
