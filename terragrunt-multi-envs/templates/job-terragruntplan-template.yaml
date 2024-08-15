@@ -52,7 +52,7 @@ jobs:
           targetType: inline
           script: |
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
-            terragr validate
+            terragrunt validate
         env:
           ARM_CLIENT_ID: $(ARMClient)
           ARM_TENANT_ID: $(TenantID)
