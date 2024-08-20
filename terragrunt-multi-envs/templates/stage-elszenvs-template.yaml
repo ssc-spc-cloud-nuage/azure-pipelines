@@ -158,3 +158,7 @@ stages:
               rg=$(az group list --query "[?contains(name, 'Management')].name" -o tsv)
               name=$(az container list -g $rg --query "[].name" -o tsv)
               az container stop -n $name --resource-group $rg
+
+              rg=$(az group list --query "[?contains(name, 'Devops')].name" -o tsv)
+              name=$(az container list -g $rg --query "[].name" -o tsv)
+              az container stop -n $name --resource-group $rg
