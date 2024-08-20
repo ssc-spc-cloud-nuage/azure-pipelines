@@ -138,7 +138,7 @@ stages:
     
   - stage: StopAgent
     dependsOn:
-    - ${{ each layer in eslzEnv.layers }}
+    - ${{ each layer in eslzEnv.layers }}:
       - ${{ eslzEnv.envName }}_Apply_${{ eslzEnv.multiRunID }}
     condition: always()
     pool:
