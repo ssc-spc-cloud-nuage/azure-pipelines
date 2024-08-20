@@ -47,8 +47,8 @@ stages:
               if [ ! -d "$(Agent.ToolsDirectory)/.tfenv" ]; then
               git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tfenv.git $(Agent.ToolsDirectory)/.tfenv
               echo 'export PATH=$(Agent.ToolsDirectory)/.tfenv/bin:$PATH' >> ~/.profile
-              $(Agent.ToolsDirectory)/.tfenv/bin/tfenv install 1.5.5
-              $(Agent.ToolsDirectory)/.tfenv/bin/tfenv use 1.5.5
+              $(Agent.ToolsDirectory)/.tfenv/bin/tfenv install latest
+              $(Agent.ToolsDirectory)/.tfenv/bin/tfenv use latest
               fi
 
               if [ ! -d "$(Agent.ToolsDirectory)/.tgenv" ]; then
