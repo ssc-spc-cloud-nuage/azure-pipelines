@@ -136,29 +136,29 @@ stages:
           eslzEnvPool: ${{ eslzEnv.pool }}
           multiRunID: ${{ eslzEnv.multiRunID }}
     
-  - stage: StopAgent_${{ eslzEnv.multiRunID }}
-    dependsOn:
-    - ${{ each layer in eslzEnv.layers }}:
-      - ${{ eslzEnv.envName }}_Apply_${{ eslzEnv.multiRunID }}
-    condition: always()
-    pool:
-      vmImage: ubuntu-latest
-    jobs:
-      - job: StopAgent
-        steps:
-        - checkout: none
-        - task: AzureCLI@2
-          name: StopAgent
-          inputs:
-            azureSubscription: ${{ eslzEnv.serviceConnection }}
-            scriptType: bash
-            scriptLocation: inlineScript
-            addSpnToEnvironment: true
-            inlineScript: |
-              rg=$(az group list --query "[?contains(name, 'Management')].name" -o tsv)
-              name=$(az container list -g $rg --query "[].name" -o tsv)
-              az container stop -n $name --resource-group $rg
+  # - stage: StopAgent_${{ eslzEnv.multiRunID }}
+  #   dependsOn:
+  #   - ${{ each layer in eslzEnv.layers }}:
+  #     - ${{ eslzEnv.envName }}_Apply_${{ eslzEnv.multiRunID }}
+  #   condition: always()
+  #   pool:
+  #     vmImage: ubuntu-latest
+  #   jobs:
+  #     - job: StopAgent
+  #       steps:
+  #       - checkout: none
+  #       - task: AzureCLI@2
+  #         name: StopAgent
+  #         inputs:
+  #           azureSubscription: ${{ eslzEnv.serviceConnection }}
+  #           scriptType: bash
+  #           scriptLocation: inlineScript
+  #           addSpnToEnvironment: true
+  #           inlineScript: |
+  #             rg=$(az group list --query "[?contains(name, 'Management')].name" -o tsv)
+  #             name=$(az container list -g $rg --query "[].name" -o tsv)
+  #             az container stop -n $name --resource-group $rg
 
-              rg=$(az group list --query "[?contains(name, 'Devops')].name" -o tsv)
-              name=$(az container list -g $rg --query "[].name" -o tsv)
-              az container stop -n $name --resource-group $rg
+  #             rg=$(az group list --query "[?contains(name, 'Devops')].name" -o tsv)
+  #             name=$(az container list -g $rg --query "[].name" -o tsv)
+  #             az container stop -n $name --resource-group $rg
