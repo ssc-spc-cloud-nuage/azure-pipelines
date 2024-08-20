@@ -136,7 +136,7 @@ stages:
           eslzEnvPool: ${{ eslzEnv.pool }}
           multiRunID: ${{ eslzEnv.multiRunID }}
     
-  - stage: StopAgent
+  - stage: StopAgent_${{ eslzEnv.multiRunID }}
     dependsOn:
     - ${{ each layer in eslzEnv.layers }}:
       - ${{ eslzEnv.envName }}_Apply_${{ eslzEnv.multiRunID }}
