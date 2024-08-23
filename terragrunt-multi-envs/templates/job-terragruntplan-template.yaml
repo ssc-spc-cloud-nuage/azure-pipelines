@@ -29,6 +29,8 @@ jobs:
           scriptType: bash
           scriptLocation: inlineScript
           addSpnToEnvironment: true
+          failOnStandardError : true
+          visibleAzLogin: false
           inlineScript: |
             export ARM_CLIENT_ID=$servicePrincipalId
             export ARM_OIDC_TOKEN=$idToken
@@ -50,6 +52,7 @@ jobs:
         name: TerragruntValidate
         inputs:
           targetType: inline
+          failOnStderr: true
           script: |
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt validate
@@ -65,6 +68,7 @@ jobs:
         name: TerragruntPlan
         inputs:
           targetType: inline
+          failOnStderr: true
           script: |         
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt plan -detailed-exitcode --out=$(Build.ArtifactStagingDirectory)/plan.tfplan
