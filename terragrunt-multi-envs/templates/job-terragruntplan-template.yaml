@@ -102,7 +102,7 @@ jobs:
             #!/bin/bash
 
             # Define input parameters
-            appId='$(APP_INSIGHTS_INSTRUMENTATION_KEY)'
+            appId='InstrumentationKey=1591046f-42fa-40d8-9cf0-126e5baf826b;IngestionEndpoint=https://canadacentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://canadacentral.livediagnostics.monitor.azure.com/;ApplicationId=d08f3308-52f7-44de-95b4-d7d979beb63c'
             apiKey='$(APP_INSIGHTS_API_KEY)'
             eventName="Terragrunt Init"
             pipelineName="$(Build.DefinitionName)"
