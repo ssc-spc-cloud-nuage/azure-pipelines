@@ -97,16 +97,16 @@ jobs:
         name: AppInsightsLogs
         inputs:
           targetType: inline
-          arguments: '$(APP_INSIGHTS_INSTRUMENTATION_KEY) $(APP_INSIGHTS_API_KEY) "Terragrunt Init" "$(Build.DefinitionName)" "$(Build.BuildNumber)"'
+          # arguments: '$(APP_INSIGHTS_INSTRUMENTATION_KEY) $(APP_INSIGHTS_API_KEY) "Terragrunt Init" "$(Build.DefinitionName)" "$(Build.BuildNumber)"'
           script: |
             #!/bin/bash
 
             # Define input parameters
-            appId='1591046f-42fa-40d8-9cf0-126e5baf826b'
-            apiKey='o1vs0w7m702g0s7btmdcyuel32tac776ebubuubb'
-            eventName=$3
-            pipelineName=$4
-            buildNumber=$5
+            appId='$(APP_INSIGHTS_INSTRUMENTATION_KEY)'
+            apiKey='$(APP_INSIGHTS_API_KEY)'
+            eventName="Terragrunt Init"
+            pipelineName="$(Build.DefinitionName)"
+            buildNumber="$(Build.BuildNumber)"
             status=$6
 
             # Set headers for the HTTP request
@@ -121,7 +121,7 @@ jobs:
               --arg eventName "$eventName" \
               --arg pipelineName "$pipelineName" \
               --arg buildNumber "$buildNumber" \
-              --arg status "$status" \
+              # --arg status "$status" \
               --arg time "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
               '{
                 name: "Microsoft.ApplicationInsights.Event",
@@ -134,7 +134,7 @@ jobs:
                     properties: {
                       PipelineName: $pipelineName,
                       BuildNumber: $buildNumber,
-                      Status: $status
+                      # Status: $status
                     }
                   }
                 }
