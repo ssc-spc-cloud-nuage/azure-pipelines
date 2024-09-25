@@ -100,7 +100,7 @@ jobs:
           arguments: '$(APP_INSIGHTS_INSTRUMENTATION_KEY) $(APP_INSIGHTS_API_KEY) "Terragrunt Init" "$(Build.DefinitionName)" "$(Build.BuildNumber)"'
           script: |
             #!/bin/bash
-
+            
             # Define input parameters
             appId=$1
             apiKey=$2

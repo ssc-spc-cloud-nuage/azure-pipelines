@@ -17,6 +17,8 @@ stages:
               sudo apt-get install jq -y
               sudo apt-get install unzip -y
               curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+              echo "APP insights intrumentation key $(APP_INSIGHTS_INSTRUMENTATION_KEY)"
             name: InstallPackages
           - bash: |
               if [[ $(Build.Reason) == "PullRequest" ]]; then
