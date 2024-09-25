@@ -93,7 +93,66 @@ jobs:
           ARM_USE_OIDC: true
           PIPELINE_TOKEN: $(pipelineToken)
 
+      - task: bash@3
+        name: AppInsightsLogs
+        inputs:
+          targetType: inline
+          arguments: '$(APP_INSIGHTS_INSTRUMENTATION_KEY) $(APP_INSIGHTS_API_KEY) "Terragrunt Init" "$(Build.DefinitionName)" "$(Build.BuildNumber)"'
+          script: |
+            #!/bin/bash
 
+            # Define input parameters
+            appId=$1
+            apiKey=$2
+            eventName=$3
+            pipelineName=$4
+            buildNumber=$5
+            status=$6
+
+            # Set headers for the HTTP request
+            headers=(
+                -H "Content-Type: application/json"
+                -H "X-Api-Key: $apiKey"
+            )
+
+            # Set the body of the HTTP request
+            body=$(jq -n \
+              --arg appId "$appId" \
+              --arg eventName "$eventName" \
+              --arg pipelineName "$pipelineName" \
+              --arg buildNumber "$buildNumber" \
+              --arg status "$status" \
+              --arg time "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+              '{
+                name: "Microsoft.ApplicationInsights.Event",
+                time: $time,
+                iKey: $appId,
+                data: {
+                  baseType: "EventData",
+                  baseData: {
+                    name: $eventName,
+                    properties: {
+                      PipelineName: $pipelineName,
+                      BuildNumber: $buildNumber,
+                      Status: $status
+                    }
+                  }
+                }
+              }')
+
+            # Define the URI for the telemetry event
+            uri="https://dc.services.visualstudio.com/v2/track"
+
+            # Make the HTTP POST request
+            response=$(curl -s -X POST "${headers[@]}" -d "$body" "$uri")
+
+            # Check if the response was successful
+            if [ $? -eq 0 ]; then
+              echo "Response: $response"
+            else
+              echo "Failed to send telemetry"
+            fi
+          
       - task: bash@3
         name: CommentPlanOnPR
         inputs:
