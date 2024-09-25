@@ -121,7 +121,6 @@ jobs:
               --arg eventName "$eventName" \
               --arg pipelineName "$pipelineName" \
               --arg buildNumber "$buildNumber" \
-              # --arg status "$status" \
               --arg time "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
               '{
                 name: "Microsoft.ApplicationInsights.Event",
