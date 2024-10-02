@@ -27,15 +27,15 @@ jobs:
                 if [ ! -d "$(Agent.ToolsDirectory)/.tfenv" ]; then
                 git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tfenv.git $(Agent.ToolsDirectory)/.tfenv
                 echo 'export PATH=$(Agent.ToolsDirectory)/.tfenv/bin:$PATH' >> ~/.profile
-                $(Agent.ToolsDirectory)/.tfenv/bin/tfenv install 1.5.5
-                $(Agent.ToolsDirectory)/.tfenv/bin/tfenv use 1.5.5
+                $(Agent.ToolsDirectory)/.tfenv/bin/tfenv install 1.9.1
+                $(Agent.ToolsDirectory)/.tfenv/bin/tfenv use 1.9.1
                 fi
 
                 if [ ! -d "$(Agent.ToolsDirectory)/.tgenv" ]; then
                 git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tgenv.git $(Agent.ToolsDirectory)/.tgenv
                 echo 'export PATH=$(Agent.ToolsDirectory)/.tgenv/bin:$PATH' >> ~/.profile
-                $(Agent.ToolsDirectory)/.tgenv/bin/tgenv install latest
-                $(Agent.ToolsDirectory)/.tgenv/bin/tgenv use latest
+                $(Agent.ToolsDirectory)/.tgenv/bin/tgenv install 0.66.9
+                $(Agent.ToolsDirectory)/.tgenv/bin/tgenv use 0.66.9
                 fi
 
                 source ~/.profile
@@ -62,6 +62,8 @@ jobs:
                 scriptType: bash
                 scriptLocation: inlineScript
                 addSpnToEnvironment: true
+                failOnStandardError : true
+                visibleAzLogin: false
                 inlineScript: |
                   export ARM_CLIENT_ID=$servicePrincipalId
                   export ARM_OIDC_TOKEN=$idToken
@@ -72,4 +74,4 @@ jobs:
 
                   cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
                   terragrunt apply -auto-approve $(Agent.TempDirectory)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan
-                failOnStderr : true
+
