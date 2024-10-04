@@ -3,6 +3,11 @@ parameters:
     type: object
   - name: checkovSkipChecks
     type: string
+  - name: terraformVersion
+    type: string
+  - name: terragruntVersion
+    type: string
+
 stages: 
 - ${{ each eslzEnv in parameters.eslzEnvs }}:  
   - stage: ${{ eslzEnv.envName }}_Plan_${{ eslzEnv.multiRunID }}
@@ -14,10 +19,46 @@ stages:
         steps:
           - checkout: none
           - bash: |
-              sudo apt-get install jq -y
-              sudo apt-get install unzip -y
-              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-            name: InstallPackages
+              if ! command -v jq &> /dev/null; then
+                sudo apt-get install -y jq
+              fi
+
+              if ! command -v unzip &> /dev/null; then
+                sudo apt-get install -y unzip
+              fi
+ 
+              if ! command -v az &> /dev/null; then
+                curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+              fi
+
+              if [ ! -d "$(Agent.ToolsDirectory)/.tfenv" ]; then
+                git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tfenv.git $(Agent.ToolsDirectory)/.tfenv
+                echo 'export PATH=$(Agent.ToolsDirectory)/.tfenv/bin:$PATH' >> ~/.profile
+              fi
+              $(Agent.ToolsDirectory)/.tfenv/bin/tfenv install ${{ parameters.terraformVersion }}
+              $(Agent.ToolsDirectory)/.tfenv/bin/tfenv use ${{ parameters.terraformVersion }}
+
+              if [ ! -d "$(Agent.ToolsDirectory)/.tgenv" ]; then
+                git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tgenv.git $(Agent.ToolsDirectory)/.tgenv
+                echo 'export PATH=$(Agent.ToolsDirectory)/.tgenv/bin:$PATH' >> ~/.profile
+              fi
+              $(Agent.ToolsDirectory)/.tgenv/bin/tgenv install ${{ parameters.terragruntVersion }}
+              $(Agent.ToolsDirectory)/.tgenv/bin/tgenv use ${{ parameters.terragruntVersion }}
+
+              source ~/.profile
+
+              echo "##vso[task.setvariable variable=JobAgentName;isOutput=true]$(Agent.Name)"
+            name: InstallTools
+
+          - bash: |
+              if [ ! -f $HOME/.local/bin/checkov ]; then
+                sudo apt install python3-pip -y
+                pip3 install checkov
+                echo 'export PATH=$HOME/.local/bin:$PATH' >> ~/.profile
+              fi
+            
+            displayName: 'Install Checkov'
+
           - bash: |
               if [[ $(Build.Reason) == "PullRequest" ]]; then
                   sourceBranch=$(echo $(System.PullRequest.SourceBranch) | sed 's|refs/heads/||')
@@ -43,34 +84,7 @@ stages:
             env:
               LAYERS_JSON: ${{ convertToJson(eslzEnv.layers) }}
               SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-          - bash: |
-              if [ ! -d "$(Agent.ToolsDirectory)/.tfenv" ]; then
-              git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tfenv.git $(Agent.ToolsDirectory)/.tfenv
-              echo 'export PATH=$(Agent.ToolsDirectory)/.tfenv/bin:$PATH' >> ~/.profile
-              $(Agent.ToolsDirectory)/.tfenv/bin/tfenv install 1.9.1
-              $(Agent.ToolsDirectory)/.tfenv/bin/tfenv use 1.9.1
-              fi
 
-              if [ ! -d "$(Agent.ToolsDirectory)/.tgenv" ]; then
-              git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tgenv.git $(Agent.ToolsDirectory)/.tgenv
-              echo 'export PATH=$(Agent.ToolsDirectory)/.tgenv/bin:$PATH' >> ~/.profile
-              $(Agent.ToolsDirectory)/.tgenv/bin/tgenv install 0.66.9
-              $(Agent.ToolsDirectory)/.tgenv/bin/tgenv use 0.66.9
-              fi
-
-              echo "##vso[task.setvariable variable=JobAgentName;isOutput=true]$(Agent.Name)"
-            
-            displayName: 'install terraform/terragrunt'
-            name: TFTGInstall
-
-          - bash: |
-              if [ ! -f $HOME/.local/bin/checkov ]; then
-                sudo apt install python3-pip -y
-                pip3 install checkov
-                echo 'export PATH=$HOME/.local/bin:$PATH' >> ~/.profile
-              fi
-            
-            displayName: 'Install Checkov'
 
 
       - template: /terragrunt-multi-envs/templates/job-terragruntplan-template.yaml@templates
@@ -135,3 +149,5 @@ stages:
           layers: ${{ eslzEnv.layers }}
           eslzEnvPool: ${{ eslzEnv.pool }}
           multiRunID: ${{ eslzEnv.multiRunID }}
+          terraformVersion: ${{ parameters.terraformVersion }} 
+          terragruntVersion: ${{ parameters.terragruntVersion }}

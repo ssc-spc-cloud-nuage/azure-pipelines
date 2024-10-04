@@ -9,7 +9,10 @@ parameters:
     type: string
   - name: multiRunID
     type: string
-
+  - name: terraformVersion
+    type: string
+  - name: terragruntVersion
+    type: string
 
 jobs:
 - ${{ each layer in parameters.layers }}:  
@@ -27,8 +30,8 @@ jobs:
                 if [ ! -d "$(Agent.ToolsDirectory)/.tfenv" ]; then
                 git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tfenv.git $(Agent.ToolsDirectory)/.tfenv
                 echo 'export PATH=$(Agent.ToolsDirectory)/.tfenv/bin:$PATH' >> ~/.profile
-                $(Agent.ToolsDirectory)/.tfenv/bin/tfenv install 1.9.1
-                $(Agent.ToolsDirectory)/.tfenv/bin/tfenv use 1.9.1
+                $(Agent.ToolsDirectory)/.tfenv/bin/tfenv install ${{ parameters.terraformVersion }}
+                $(Agent.ToolsDirectory)/.tfenv/bin/tfenv use ${{ parameters.terragruntVersion }}
                 fi
 
                 if [ ! -d "$(Agent.ToolsDirectory)/.tgenv" ]; then
