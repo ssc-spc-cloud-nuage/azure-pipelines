@@ -51,8 +51,9 @@ jobs:
         name: TerragruntValidate
         inputs:
           targetType: inline
-          failOnStderr: true
+          #failOnStderr: true
           script: |
+            set -e
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt validate
         env:
