@@ -68,8 +68,9 @@ jobs:
         name: TerragruntPlan
         inputs:
           targetType: inline
-          failOnStderr: true
-          script: |         
+          failOnStderr: false
+          script: |  
+            set -e       
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt plan --out=$(Build.ArtifactStagingDirectory)/plan.tfplan
             terragrunt show -no-color $(Build.ArtifactStagingDirectory)/plan.tfplan > $(Build.ArtifactStagingDirectory)/plan_${{ layer }}.txt
