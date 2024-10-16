@@ -105,7 +105,7 @@ stages:
           - TerragruntPlan_${{ eslzEnv.envName }}_${{ layer }}
         condition: always()
         variables:
-          AgentName: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
+          AgentName: $[ dependencies.InitJob.outputs['InstallTools.JobAgentName'] ]
         pool: 
           name: ${{ eslzEnv.pool }}
           demands: Agent.Name -equals $(AgentName)
