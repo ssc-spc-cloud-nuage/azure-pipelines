@@ -44,6 +44,7 @@ jobs:
             echo "##vso[task.setvariable variable=TenantID;issecret=true]$ARM_TENANT_ID"
             echo "##vso[task.setvariable variable=pipelineToken;issecret=true]$PIPELINE_TOKEN"
 
+            git pull https://Azure163ent-CloudOperations:$PIPELINE_TOKEN@dev.azure.com/Azure163ent-CloudOperations/ESLZ-light_template/_git/L1_blueprint_base?ref=20241015.1
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt init
       
