@@ -107,7 +107,7 @@ jobs:
             eventName="Terragrunt Init"
             pipelineName="$(Build.DefinitionName)"
             buildNumber="$(Build.BuildNumber)"
-            status=$6
+            status=$(cat $(Build.ArtifactStagingDirectory)/plan${{ layer }}.txt)
 
             # Set headers for the HTTP request
             headers=(
