@@ -115,7 +115,7 @@ jobs:
             if [ -n "$changes" ]; then
               output=$($changes | jq .)
             else
-              output='No changes'
+              output="No changes"
 
             # Set headers for the HTTP request
             headers=(
