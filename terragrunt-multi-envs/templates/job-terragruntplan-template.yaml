@@ -109,7 +109,7 @@ jobs:
             buildNumber="$(Build.BuildNumber)"
 
             terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json
-            changes=$(jq '.resource_changes[] | select(.change.actions | index("no-op") | not)' tfplan.json)
+            changes=$(jq '.resource_changes[] | select(.change.actions | index("no-op") | not)' plan.json)
             
             if [ -n "$changes" ]; then
               output=$($changes | jq .)
