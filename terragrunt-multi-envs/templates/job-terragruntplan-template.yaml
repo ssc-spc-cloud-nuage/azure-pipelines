@@ -108,6 +108,7 @@ jobs:
             pipelineName="$(Build.DefinitionName)"
             buildNumber="$(Build.BuildNumber)"
 
+            cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json
             changes=$(jq '.resource_changes[] | select(.change.actions | index("no-op") | not)' plan.json)
             
