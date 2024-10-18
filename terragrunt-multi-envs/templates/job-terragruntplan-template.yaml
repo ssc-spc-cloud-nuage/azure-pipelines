@@ -112,10 +112,10 @@ jobs:
             terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json
             changes=$(jq '.resource_changes[] | select(.change.actions | index("no-op") | not)' plan.json)
             
-            if [ -n "$changes" ]; then
-              output=$($changes | jq .)
-            else
-              output="No changes"
+            # if [ -n "$changes" ]; then
+            #   output=$($changes | jq .)
+            # else
+            #   output="No changes"
 
             # Set headers for the HTTP request
             headers=(
@@ -129,7 +129,7 @@ jobs:
               --arg eventName "$eventName" \
               --arg pipelineName "$pipelineName" \
               --arg buildNumber "$buildNumber" \
-              --arg tgOut "$output" \
+              --arg tgOut "$changes" \
               --arg time "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
               '{
                 name: "Microsoft.ApplicationInsights.Event",
