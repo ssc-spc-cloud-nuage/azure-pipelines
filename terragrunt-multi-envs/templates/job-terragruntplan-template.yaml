@@ -107,7 +107,14 @@ jobs:
             eventName="Terragrunt Init"
             pipelineName="$(Build.DefinitionName)"
             buildNumber="$(Build.BuildNumber)"
-            change=$(cat $(Build.ArtifactStagingDirectory)/plan_${{ layer }}.txt)
+
+            terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json
+            changes=$(jq '.resource_changes[] | select(.change.actions | index("no-op") | not)' tfplan.json)
+            
+            if [ -n "$changes" ]; then
+              output=$($changes | jq .)
+            else
+              output='No changes'
 
             # Set headers for the HTTP request
             headers=(
@@ -121,7 +128,7 @@ jobs:
               --arg eventName "$eventName" \
               --arg pipelineName "$pipelineName" \
               --arg buildNumber "$buildNumber" \
-              --arg change "$change" \
+              --arg tgOut "$output" \
               --arg time "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
               '{
                 name: "Microsoft.ApplicationInsights.Event",
