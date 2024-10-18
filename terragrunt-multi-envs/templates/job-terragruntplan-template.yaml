@@ -101,6 +101,12 @@ jobs:
           script: |
             #!/bin/bash
 
+            function display_changes(){
+              local action=$1
+              echo "Resources that will be $action:"
+              jq --arg action "$action" '.resource_changes[] | select(.change.actions | contains([$action])) | .address' plan.json
+            }
+
             # Define input parameters
             appId='1591046f-42fa-40d8-9cf0-126e5baf826b'
             apiKey='$(APP_INSIGHTS_API_KEY)'
@@ -110,12 +116,11 @@ jobs:
 
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json
-            changes=$(jq '.resource_changes[] | select(.change.actions | index("no-op") | not)' plan.json)
             
-            # if [ -n "$changes" ]; then
-            #   output=$($changes | jq .)
-            # else
-            #   output="No changes"
+            create=$(display_changes "create")
+            update=$(display_changes "update")
+            delete=$(display_changes "delete")
+            output="Resources that will be created:\n${create}\n\nResources that will be updated:\n${update}\n\nResources that will be deleted:\n${delete}"
 
             # Set headers for the HTTP request
             headers=(
@@ -129,7 +134,7 @@ jobs:
               --arg eventName "$eventName" \
               --arg pipelineName "$pipelineName" \
               --arg buildNumber "$buildNumber" \
-              --arg tgOut "$changes" \
+              --arg tgOut "$output" \
               --arg time "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
               '{
                 name: "Microsoft.ApplicationInsights.Event",
