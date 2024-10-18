@@ -82,6 +82,7 @@ jobs:
           ARM_OIDC_TOKEN: $(OIDCToken)
           ARM_USE_OIDC: true
           PIPELINE_TOKEN: $(pipelineToken)
+          SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
       - task: bash@3
         name: Checkov

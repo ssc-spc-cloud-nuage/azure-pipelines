@@ -78,4 +78,6 @@ jobs:
 
                   cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
                   terragrunt apply -auto-approve $(Agent.TempDirectory)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan
+              env:
+                SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
