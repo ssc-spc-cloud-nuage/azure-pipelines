@@ -112,6 +112,11 @@ jobs:
             eventName="Terragrunt Init"
             pipelineName="$(Build.DefinitionName)"
             buildNumber="$(Build.BuildNumber)"
+            org="$(System.CollectionUri)"
+            project="$(System.TeamProject)"
+            fullURL="$org/$project"
+            subscription_id=$(grep 'subscription_id' $(Build.SourcesDirectory)/landing_zones_*/config.hcl | awk '{print $3}' | tr -d '"')
+
 
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json
@@ -121,6 +126,7 @@ jobs:
             delete=$(display_changes "delete")
 
             tfOutput=$(printf "Resources that will be created:\n%s\n\nResources that will be updated:\n%s\n\nResources that will be deleted:\n%s\n" "$create" "$update" "$delete")
+            
 
             # Set headers for the HTTP request
             headers=(
@@ -137,6 +143,8 @@ jobs:
               --arg eventName "$eventName" \
               --arg pipelineName "$pipelineName" \
               --arg buildNumber "$buildNumber" \
+              --arg subID "$subscription_id" \
+              --arg project "$fullURL" \
               --arg tfOutput "$escaped_tfOutput" \
               --arg time "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
               '{
@@ -150,6 +158,8 @@ jobs:
                     properties: {
                       PipelineName: $pipelineName,
                       BuildNumber: $buildNumber,
+                      subID: $subID,
+                      project: $project,
                       TFOutput: $tfOutput | fromjson
                     }
                   }
