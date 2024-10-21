@@ -101,26 +101,24 @@ jobs:
           script: |
             #!/bin/bash
 
-            function display_changes(){
+            function display_changes() {
               local action=$1
-              echo "Resources that will be $action:"
-              jq --arg action "$action" '.resource_changes[] | select(.change.actions | contains([$action])) | .address' plan.json
+              jq --arg action "$action" -r '.resource_changes[] | select(.change.actions | contains([$action])) | .address' plan.json | while IFS= read -r line; do printf "%s\n" "$line"; done
             }
 
-            # Define input parameters
-            appId='1591046f-42fa-40d8-9cf0-126e5baf826b'
-            apiKey='$(APP_INSIGHTS_API_KEY)'
-            eventName="Terragrunt Init"
-            pipelineName="$(Build.DefinitionName)"
-            buildNumber="$(Build.BuildNumber)"
-
-            cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
-            terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json
-            
             create=$(display_changes "create")
             update=$(display_changes "update")
             delete=$(display_changes "delete")
-            output="Resources that will be created:\n${create}\n\nResources that will be updated:\n${update}\n\nResources that will be deleted:\n${delete}"
+
+            # Define input parameters
+            appId='1591046f-42fa-40d8-9cf0-126e5baf826b'
+            apiKey='o1vs0w7m702g0s7btmdcyuel32tac776ebubuubb'
+            eventName="Terragrunt Init"
+            pipelineName="PipelineNAme"
+            buildNumber="4"
+            # Use printf to interpret escape sequences like \n
+            tfOutput=$(printf "Resources that will be created:\n%s\n\nResources that will be updated:\n%s\n\nResources that will be deleted:\n%s\n" "$create" "$update" "$delete")
+            status=$6
 
             # Set headers for the HTTP request
             headers=(
@@ -128,13 +126,16 @@ jobs:
                 -H "X-Api-Key: $apiKey"
             )
 
+            # Escape the newlines for JSON
+            escaped_tfOutput=$(echo "$tfOutput" | jq -aRs .)
+
             # Set the body of the HTTP request
             body=$(jq -n \
               --arg appId "$appId" \
               --arg eventName "$eventName" \
               --arg pipelineName "$pipelineName" \
               --arg buildNumber "$buildNumber" \
-              --arg tgOut "$output" \
+              --arg tfOutput "$escaped_tfOutput" \
               --arg time "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
               '{
                 name: "Microsoft.ApplicationInsights.Event",
@@ -147,7 +148,7 @@ jobs:
                     properties: {
                       PipelineName: $pipelineName,
                       BuildNumber: $buildNumber,
-                      Change: $change
+                      TFOutput: $tfOutput | fromjson
                     }
                   }
                 }
