@@ -100,12 +100,13 @@ jobs:
           # arguments: '$(APP_INSIGHTS_INSTRUMENTATION_KEY) $(APP_INSIGHTS_API_KEY) "Terragrunt Init" "$(Build.DefinitionName)" "$(Build.BuildNumber)"'
           script: |
             #!/bin/bash
-
+            
             function display_changes() {
               local action=$1
               jq --arg action "$action" -r '.resource_changes[] | select(.change.actions | contains([$action])) | .address' plan.json | while IFS= read -r line; do printf "%s\n" "$line"; done
             }
-
+            cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
+            terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json 
             create=$(display_changes "create")
             update=$(display_changes "update")
             delete=$(display_changes "delete")
