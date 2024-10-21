@@ -115,7 +115,7 @@ jobs:
             org="$(System.CollectionUri)"
             project="$(System.TeamProject)"
             fullURL="$org$project"
-            subscription_id=$(grep 'subscription_id' $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/config.hcl | awk '{print $3}' | tr -d '"')
+            subscription_id=$(grep '^subscription_id\s*=' $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/config.hcl | awk '{print $3}' | tr -d '"')
 
 
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
