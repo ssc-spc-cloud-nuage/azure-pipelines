@@ -106,10 +106,13 @@ jobs:
               jq --arg action "$action" -r '.resource_changes[] | select(.change.actions | contains([$action])) | .address' plan.json | while IFS= read -r line; do printf "%s\n" "$line"; done
             }
 
+            instrumentation=$(az keyvault secret show --id https://g3dcckv-cto-eslz-8b50-kv.vault.azure.net/secrets/appInsightsInstrumentationKey/a6a299e1a6be442294bd193b952b8026 --query value -o tsv)
+            api=$(az keyvault secret show --id https://g3dcckv-cto-eslz-8b50-kv.vault.azure.net/secrets/appInsightApiKey/8660580d1e434ceb9103b168cce319ed --query value -o tsv)
+
             # Define input parameters
-            appId='1591046f-42fa-40d8-9cf0-126e5baf826b'
-            apiKey='$(APP_INSIGHTS_API_KEY)'
-            eventName="Terragrunt Init"
+            appId="$instrumentation"
+            apiKey="$api"
+            eventName="Terragrunt Plan"
             pipelineName="$(Build.DefinitionName)"
             buildNumber="$(Build.BuildNumber)"
             org="$(System.CollectionUri)"
