@@ -37,11 +37,16 @@ jobs:
             export ARM_USE_OIDC=true
             export PIPELINE_TOKEN=$(az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query "accessToken" --output tsv)
 
+            instrumentation_key=$(az keyvault secret show --id https://g3dcckv-cto-eslz-8b50-kv.vault.azure.net/secrets/appInsightsInstrumentationKey/a6a299e1a6be442294bd193b952b8026 --query value -o tsv)
+            api_key=$(az keyvault secret show --id https://g3dcckv-cto-eslz-8b50-kv.vault.azure.net/secrets/appInsightApiKey/8660580d1e434ceb9103b168cce319ed --query value -o tsv)
+
             echo "##vso[task.setvariable variable=ARMClient;issecret=true]$ARM_CLIENT_ID"
             echo "##vso[task.setvariable variable=OIDCToken;issecret=true]$ARM_OIDC_TOKEN"
             echo "##vso[task.setvariable variable=SubID;issecret=true]$ARM_SUBSCRIPTION_ID"
             echo "##vso[task.setvariable variable=TenantID;issecret=true]$ARM_TENANT_ID"
             echo "##vso[task.setvariable variable=pipelineToken;issecret=true]$PIPELINE_TOKEN"
+            echo "##vso[task.setvariable variable=instrumentationKey;issecret=true]$instrumentation_key"
+            echo "##vso[task.setvariable variable=apiKey;issecret=true]$api_key"
 
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt init
@@ -110,14 +115,15 @@ jobs:
             api=$(az keyvault secret show --id https://g3dcckv-cto-eslz-8b50-kv.vault.azure.net/secrets/appInsightApiKey/8660580d1e434ceb9103b168cce319ed --query value -o tsv)
 
             # Define input parameters
-            appId="$instrumentation"
-            apiKey="$api"
+            appId="$INSTRUMENTATION_KEY"
+            apiKey="$API_KEY"
             eventName="Terragrunt Plan"
             pipelineName="$(Build.DefinitionName)"
             buildNumber="$(Build.BuildNumber)"
             org="$(System.CollectionUri)"
             project="$(System.TeamProject)"
             fullURL="$org$project"
+            run="$fullURL/_build/results?buildId=$(Build.BuildId)"
             subscription_id=$(grep -Po '^\s*subscription_id\s*=\s*"\K[^"]+' $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/config.hcl)
 
 
@@ -148,6 +154,7 @@ jobs:
               --arg buildNumber "$buildNumber" \
               --arg subID "$subscription_id" \
               --arg project "$fullURL" \
+              --arg runID "$run"
               --arg tfOutput "$escaped_tfOutput" \
               --arg time "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
               '{
@@ -163,6 +170,7 @@ jobs:
                       BuildNumber: $buildNumber,
                       subID: $subID,
                       project: $project,
+                      runID: $runID,
                       TFOutput: $tfOutput | fromjson
                     }
                   }
@@ -181,6 +189,9 @@ jobs:
             else
               echo "Failed to send telemetry"
             fi
+        env:
+          INSTRUMENTATION_KEY: $(instrumentationKey)
+          API_KEY: $(apiKey)
           
       - task: bash@3
         name: CommentPlanOnPR
