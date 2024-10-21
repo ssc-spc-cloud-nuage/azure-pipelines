@@ -100,26 +100,27 @@ jobs:
           # arguments: '$(APP_INSIGHTS_INSTRUMENTATION_KEY) $(APP_INSIGHTS_API_KEY) "Terragrunt Init" "$(Build.DefinitionName)" "$(Build.BuildNumber)"'
           script: |
             #!/bin/bash
-            
+
             function display_changes() {
               local action=$1
               jq --arg action "$action" -r '.resource_changes[] | select(.change.actions | contains([$action])) | .address' plan.json | while IFS= read -r line; do printf "%s\n" "$line"; done
             }
+
+            # Define input parameters
+            appId='1591046f-42fa-40d8-9cf0-126e5baf826b'
+            apiKey='$(APP_INSIGHTS_API_KEY)'
+            eventName="Terragrunt Init"
+            pipelineName="$(Build.DefinitionName)"
+            buildNumber="$(Build.BuildNumber)"
+
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
-            terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json 
+            terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json
+            
             create=$(display_changes "create")
             update=$(display_changes "update")
             delete=$(display_changes "delete")
 
-            # Define input parameters
-            appId='1591046f-42fa-40d8-9cf0-126e5baf826b'
-            apiKey='o1vs0w7m702g0s7btmdcyuel32tac776ebubuubb'
-            eventName="Terragrunt Init"
-            pipelineName="PipelineNAme"
-            buildNumber="4"
-            # Use printf to interpret escape sequences like \n
             tfOutput=$(printf "Resources that will be created:\n%s\n\nResources that will be updated:\n%s\n\nResources that will be deleted:\n%s\n" "$create" "$update" "$delete")
-            status=$6
 
             # Set headers for the HTTP request
             headers=(
