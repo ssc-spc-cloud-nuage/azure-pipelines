@@ -114,7 +114,7 @@ jobs:
             # Define input parameters
             appId="$INSTRUMENTATION_KEY"
             apiKey="$API_KEY"
-            eventName="Terragrunt Plan"
+            eventName="Terragrunt Plan $(System.TeamProject)"
             pipelineName="$(Build.DefinitionName)"
             buildNumber="$(Build.BuildNumber)"
             org="$(System.CollectionUri)"
