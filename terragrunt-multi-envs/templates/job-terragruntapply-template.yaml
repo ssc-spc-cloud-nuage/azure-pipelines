@@ -76,9 +76,79 @@ jobs:
                   export ARM_USE_OIDC=true
                   export PIPELINE_TOKEN=$(az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query "accessToken" --output tsv)
                   export TERRAGRUNT_PIPELINE_RUN=true
+                  export instrumentation_key=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/instkey/a68523ce6abf4d77addf4cfbc247fbd1 --query value -o tsv)
+                  export api_key=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/G3Sc-CPMS-MMahdavian-app-insights-appi-api-key/59750d02a3bc498abcf7e30d4d01e936 --query value -o tsv)
 
                   cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
                   terragrunt apply -auto-approve $(Agent.TempDirectory)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan
+
+                  # Define input parameters
+                  appId="$INSTRUMENTATION_KEY"
+                  apiKey="$API_KEY"
+                  eventName="Terragrunt Apply $(System.TeamProject) ${{ layer }}"
+                  pipelineName="$(Build.DefinitionName)"
+                  buildNumber="$(Build.BuildNumber)"
+                  org="$(System.CollectionUri)"
+                  project="$(System.TeamProject)"
+                  fullURL="$org$project"
+                  run="$fullURL/_build/results?buildId=$(Build.BuildId)"
+                  subscription_id=$(grep -Po '^\s*subscription_id\s*=\s*"\K[^"]+' $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/config.hcl)                  
+
+                  if [ $? -eq 0 ]; then
+                    tfOutput="Successful Apply"
+                  else
+                    tfOutput="Error in Apply"
+                  
+
+                  # Set headers for the HTTP request
+                  headers=(
+                      -H "Content-Type: application/json"
+                      -H "X-Api-Key: $apiKey"
+                  )
+
+                  # Set the body of the HTTP request
+                  body=$(jq -n \
+                    --arg appId "$appId" \
+                    --arg eventName "$eventName" \
+                    --arg pipelineName "$pipelineName" \
+                    --arg buildNumber "$buildNumber" \
+                    --arg subID "$subscription_id" \
+                    --arg project "$fullURL" \
+                    --arg runID "$run" \
+                    --arg tfOutput "$tfOutput" \
+                    --arg time "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+                    '{
+                      name: "Microsoft.ApplicationInsights.Event",
+                      time: $time,
+                      iKey: $appId,
+                      data: {
+                        baseType: "EventData",
+                        baseData: {
+                          name: $eventName,
+                          properties: {
+                            PipelineName: $pipelineName,
+                            BuildNumber: $buildNumber,
+                            subID: $subID,
+                            project: $project,
+                            runID: $runID,
+                            TFOutput: $tfOutput
+                          }
+                        }
+                      }
+                    }')
+
+                  # Define the URI for the telemetry event
+                  uri="https://dc.services.visualstudio.com/v2/track"
+
+                  # Make the HTTP POST request
+                  response=$(curl -s -X POST "${headers[@]}" -d "$body" "$uri")
+
+                  # Check if the response was successful
+                  if [ $? -eq 0 ]; then
+                    echo "Response: $response"
+                  else
+                    echo "Failed to send telemetry"
+                  fi
               env:
                 SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
