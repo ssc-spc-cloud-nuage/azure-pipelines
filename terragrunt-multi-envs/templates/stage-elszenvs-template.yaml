@@ -149,5 +149,5 @@ stages:
           layers: ${{ eslzEnv.layers }}
           eslzEnvPool: ${{ eslzEnv.pool }}
           multiRunID: ${{ eslzEnv.multiRunID }}
-          terraformVersion: ${{ parameters.terraformVersion }} 
-          terragruntVersion: ${{ parameters.terragruntVersion }}
+          # terraformVersion: ${{ parameters.terraformVersion }} 
+          # terragruntVersion: ${{ parameters.terragruntVersion }}
