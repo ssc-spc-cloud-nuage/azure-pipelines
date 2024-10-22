@@ -80,7 +80,9 @@ jobs:
                   export api_key=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/G3Sc-CPMS-MMahdavian-app-insights-appi-api-key/59750d02a3bc498abcf7e30d4d01e936 --query value -o tsv)
 
                   cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
-                  terragrunt apply -auto-approve $(Agent.TempDirectory)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan
+                  terragrunt apply -auto-approve $(Agent.TempDirectory)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan  
+
+                  echo "Finished with apply"
 
                   # Define input parameters
                   appId="$INSTRUMENTATION_KEY"
@@ -99,6 +101,7 @@ jobs:
                   else
                     tfOutput="Error in Apply"
                   
+                  echo $tfOutput
 
                   # Set headers for the HTTP request
                   headers=(
