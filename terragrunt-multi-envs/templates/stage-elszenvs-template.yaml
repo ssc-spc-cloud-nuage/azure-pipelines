@@ -6,7 +6,7 @@ parameters:
 stages: 
 - ${{ each eslzEnv in parameters.eslzEnvs }}:  
   - stage: ${{ eslzEnv.envName }}_Plan_${{ eslzEnv.multiRunID }}
-    dependsOn:
+    dependsOn: StartAgents
     condition: always()
     jobs:
       - job: InitJob
