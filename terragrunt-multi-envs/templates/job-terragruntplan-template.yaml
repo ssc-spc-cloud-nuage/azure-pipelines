@@ -106,11 +106,10 @@ jobs:
           ARM_USE_OIDC: true
           PIPELINE_TOKEN: $(pipelineToken)
 
-       - task: bash@3
-         name: AppInsightsLogs
-         inputs:
+      - task: bash@3
+        name: AppInsightLogs
+        inputs:
           targetType: inline
-          # arguments: '$(APP_INSIGHTS_INSTRUMENTATION_KEY) $(APP_INSIGHTS_API_KEY) "Terragrunt Init" "$(Build.DefinitionName)" "$(Build.BuildNumber)"'
           script: |
             #!/bin/bash
 
