@@ -65,9 +65,10 @@ jobs:
                 scriptType: bash
                 scriptLocation: inlineScript
                 addSpnToEnvironment: true
-                failOnStandardError : true
+                failOnStandardError : false
                 visibleAzLogin: false
                 inlineScript: |
+                  set -e
                   export ARM_CLIENT_ID=$servicePrincipalId
                   export ARM_OIDC_TOKEN=$idToken
                   export ARM_TENANT_ID=$tenantId
