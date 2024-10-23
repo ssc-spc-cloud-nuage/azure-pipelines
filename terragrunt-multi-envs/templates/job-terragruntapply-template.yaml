@@ -97,7 +97,7 @@ jobs:
                 targetType: inline
                 script: |
                   set - e
-				          # Define input parameters
+                  # Define input parameters
                   appId="$INSTRUMENTATION_KEY"
                   apiKey="$API_KEY"
                   eventName="Terragrunt Apply $(System.TeamProject) ${{ layer }}"
