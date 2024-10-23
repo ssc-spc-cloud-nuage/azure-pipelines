@@ -76,8 +76,8 @@ jobs:
                   export ARM_USE_OIDC=true
                   export PIPELINE_TOKEN=$(az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query "accessToken" --output tsv)
                   export TERRAGRUNT_PIPELINE_RUN=true
-                  export instrumentation_key=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/instkey/a68523ce6abf4d77addf4cfbc247fbd1 --query value -o tsv)
-                  export api_key=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/G3Sc-CPMS-MMahdavian-app-insights-appi-api-key/59750d02a3bc498abcf7e30d4d01e936 --query value -o tsv)
+                  export INSTRUMENTATION_KEY=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/instkey/a68523ce6abf4d77addf4cfbc247fbd1 --query value -o tsv)
+                  export API_KEY=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/G3Sc-CPMS-MMahdavian-app-insights-appi-api-key/59750d02a3bc498abcf7e30d4d01e936 --query value -o tsv)
 
                   cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
                   terragrunt apply -auto-approve $(Agent.TempDirectory)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan  
