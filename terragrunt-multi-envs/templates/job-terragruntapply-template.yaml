@@ -79,12 +79,27 @@ jobs:
                   export INSTRUMENTATION_KEY=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/instkey/a68523ce6abf4d77addf4cfbc247fbd1 --query value -o tsv)
                   export API_KEY=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/G3Sc-CPMS-MMahdavian-app-insights-appi-api-key/59750d02a3bc498abcf7e30d4d01e936 --query value -o tsv)
 
+                  echo "##vso[task.setvariable variable=instrumentationKey;issecret=true]$instrumentation_key"
+                  echo "##vso[task.setvariable variable=apiKey;issecret=true]$api_key"
+
                   cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
                   terragrunt apply -auto-approve $(Agent.TempDirectory)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan  
 
                   echo "Finished with apply"
 
-                  # Define input parameters
+              env:
+                SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+
+            - task: bash@3
+              name: LogApply
+              condition: succeededOrFailed()
+              inputs:
+                targetType: inline
+                failOnStderr: false
+                script: |
+                  set - e
+
+				          # Define input parameters
                   appId="$INSTRUMENTATION_KEY"
                   apiKey="$API_KEY"
                   eventName="Terragrunt Apply $(System.TeamProject) ${{ layer }}"
@@ -154,5 +169,5 @@ jobs:
                     echo "Failed to send telemetry"
                   fi
               env:
-                SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-
+                INSTRUMENTATION_KEY: $(instrumentationKey)
+                API_KEY: $(apiKey)
