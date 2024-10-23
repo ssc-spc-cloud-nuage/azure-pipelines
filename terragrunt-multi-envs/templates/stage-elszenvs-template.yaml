@@ -121,29 +121,29 @@ stages:
                 if [[ -f $(Agent.TempDirectory)/plan_${{ eslzEnv.envName }}_$layername/plan_$layername.txt ]]; then
                   planvar=$(cat $(Agent.TempDirectory)/plan_${{ eslzEnv.envName }}_$layername/plan_$layername.txt)
 
-                  # if [[ "$planvar" =~ "No changes. Your infrastructure matches the configuration." ]]; then
-                  #       echo "No Changes in plan detected in $layername)."
-                  #       # echo "##vso[task.setvariable variable=PlanChange;isOutput=true]false"
-                  # else
-                  #       echo "Changes in plan detected in $layername)."
-                  #       echo "##vso[task.setvariable variable=PlanChange;isOutput=true]true"
-                  #   fi
-
-                  if echo "$planvar" | grep -q "Plan:.*to add"; then
-                    echo "Changes in plan detected in $layername)."
-                    changes_detected=true
-                  elif echo "$planvar" | grep -q "Plan:.*to change"; then
-                    echo "Changes in plan detected in $layername)."
-                    changes_detected=true
-                  elif echo "$planvar" | grep -q "Plan:.*to destroy"; then
-                    echo "Changes in plan detected in $layername)."
-                    changes_detected=true
+                  if [[ "$planvar" =~ "No changes. Your infrastructure matches the configuration." ]]; then
+                        echo "No Changes in plan detected in $layername)."
+                        # echo "##vso[task.setvariable variable=PlanChange;isOutput=true]false"
                   else
-                    echo "No Changes in plan detected in $layername)."
-                    changes_detected=false
-                  fi
+                        echo "Changes in plan detected in $layername)."
+                        echo "##vso[task.setvariable variable=PlanChange;isOutput=true]true"
+                    fi
 
-                  echo "##vso[task.setvariable variable=PlanChange;isOutput=true]$changes_detected"
+                  # if echo "$planvar" | grep -q "Plan:.*to add"; then
+                  #   echo "Changes in plan detected in $layername)."
+                  #   changes_detected=true
+                  # elif echo "$planvar" | grep -q "Plan:.*to change"; then
+                  #   echo "Changes in plan detected in $layername)."
+                  #   changes_detected=true
+                  # elif echo "$planvar" | grep -q "Plan:.*to destroy"; then
+                  #   echo "Changes in plan detected in $layername)."
+                  #   changes_detected=true
+                  # else
+                  #   echo "No Changes in plan detected in $layername)."
+                  #   changes_detected=false
+                  # fi
+
+                  # echo "##vso[task.setvariable variable=PlanChange;isOutput=true]$changes_detected"
                 fi
               done
             name: CheckPlanChangeTask
