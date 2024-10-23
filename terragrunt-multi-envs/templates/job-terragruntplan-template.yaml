@@ -79,7 +79,7 @@ jobs:
           script: |  
             set -e       
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
-            terragrunt plan --out=$(Build.ArtifactStagingDirectory)/plan.tfplan
+            terragrunt plan --out=$(Build.ArtifactStagingDirectory)/plan.tfplan --terragrunt-forward-tf-stdout
             terragrunt show -no-color $(Build.ArtifactStagingDirectory)/plan.tfplan > $(Build.ArtifactStagingDirectory)/plan_${{ layer }}.txt
         env:
           ARM_CLIENT_ID: $(ARMClient)
@@ -233,9 +233,9 @@ jobs:
           PathtoPublish: $(Build.ArtifactStagingDirectory)
           ArtifactName: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
       
-      - task: PublishBuildArtifacts@1
-        name: PublishTF
-        inputs:
-          PathtoPublish: $(Build.SourcesDirectory)
-          ArtifactName: tf_${{ parameters.eslzEnvFolder }}_${{ layer }}
+      # - task: PublishBuildArtifacts@1
+      #   name: PublishTF
+      #   inputs:
+      #     PathtoPublish: $(Build.SourcesDirectory)
+      #     ArtifactName: tf_${{ parameters.eslzEnvFolder }}_${{ layer }}
       
