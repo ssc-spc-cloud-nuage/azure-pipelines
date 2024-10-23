@@ -95,10 +95,8 @@ jobs:
               condition: succeededOrFailed()
               inputs:
                 targetType: inline
-                failOnStderr: false
                 script: |
                   set - e
-
 				          # Define input parameters
                   appId="$INSTRUMENTATION_KEY"
                   apiKey="$API_KEY"
