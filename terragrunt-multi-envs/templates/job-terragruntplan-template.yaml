@@ -5,7 +5,7 @@ parameters:
     type: string
   - name: eslzEnvFolder
     type: string
-  - name: checkovSkipChecks
+  - name: checkovArgs
     type: string
   - name: eslzEnvPool
     type: string
@@ -95,7 +95,7 @@ jobs:
           script: |
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json 
-            checkov -f plan.json --skip-check ${{ parameters.checkovSkipChecks }} --quiet --soft-fail
+            checkov -f plan.json ${{ parameters.checkovArgs }}
         env:
           ARM_CLIENT_ID: $(ARMClient)
           ARM_TENANT_ID: $(TenantID)
@@ -103,97 +103,6 @@ jobs:
           ARM_OIDC_TOKEN: $(OIDCToken)
           ARM_USE_OIDC: true
           PIPELINE_TOKEN: $(pipelineToken)
-
-      # - task: bash@3
-      #   name: AppInsightLogs
-      #   inputs:
-      #     targetType: inline
-      #     script: |
-      #       #!/bin/bash
-
-      #       function display_changes() {
-      #         local action=$1
-      #         jq --arg action "$action" -r '.resource_changes[] | select(.change.actions | contains([$action])) | .address' plan.json | while IFS= read -r line; do printf "%s\n" "$line"; done
-      #       }
-
-      #       # Define input parameters
-      #       appId="$INSTRUMENTATION_KEY"
-      #       apiKey="$API_KEY"
-      #       eventName="Terragrunt Plan $(System.TeamProject) ${{ layer }}"
-      #       pipelineName="$(Build.DefinitionName)"
-      #       buildNumber="$(Build.BuildNumber)"
-      #       org="$(System.CollectionUri)"
-      #       project="$(System.TeamProject)"
-      #       fullURL="$org$project"
-      #       run="$fullURL/_build/results?buildId=$(Build.BuildId)"
-      #       subscription_id=$(grep -Po '^\s*subscription_id\s*=\s*"\K[^"]+' $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/config.hcl)
-
-
-      #       cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
-      #       terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json
-            
-      #       create=$(display_changes "create")
-      #       update=$(display_changes "update")
-      #       delete=$(display_changes "delete")
-
-      #       tfOutput=$(printf "Resources that will be created:\n%s\n\nResources that will be updated:\n%s\n\nResources that will be deleted:\n%s\n" "$create" "$update" "$delete")
-            
-
-      #       # Set headers for the HTTP request
-      #       headers=(
-      #           -H "Content-Type: application/json"
-      #           -H "X-Api-Key: $apiKey"
-      #       )
-
-      #       # Escape the newlines for JSON
-      #       escaped_tfOutput=$(echo "$tfOutput" | jq -aRs .)
-
-      #       # Set the body of the HTTP request
-      #       body=$(jq -n \
-      #         --arg appId "$appId" \
-      #         --arg eventName "$eventName" \
-      #         --arg pipelineName "$pipelineName" \
-      #         --arg buildNumber "$buildNumber" \
-      #         --arg subID "$subscription_id" \
-      #         --arg project "$fullURL" \
-      #         --arg runID "$run" \
-      #         --arg tfOutput "$escaped_tfOutput" \
-      #         --arg time "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-      #         '{
-      #           name: "Microsoft.ApplicationInsights.Event",
-      #           time: $time,
-      #           iKey: $appId,
-      #           data: {
-      #             baseType: "EventData",
-      #             baseData: {
-      #               name: $eventName,
-      #               properties: {
-      #                 PipelineName: $pipelineName,
-      #                 BuildNumber: $buildNumber,
-      #                 subID: $subID,
-      #                 project: $project,
-      #                 runID: $runID,
-      #                 TFOutput: $tfOutput | fromjson
-      #               }
-      #             }
-      #           }
-      #         }')
-
-      #       # Define the URI for the telemetry event
-      #       uri="https://dc.services.visualstudio.com/v2/track"
-
-      #       # Make the HTTP POST request
-      #       response=$(curl -s -X POST "${headers[@]}" -d "$body" "$uri")
-
-      #       # Check if the response was successful
-      #       if [ $? -eq 0 ]; then
-      #         echo "Response: $response"
-      #       else
-      #         echo "Failed to send telemetry"
-      #       fi
-      #   env:
-      #     INSTRUMENTATION_KEY: $(instrumentationKey)
-      #     API_KEY: $(apiKey)
 
       - task: bash@3
         name: CommentPlanOnPR
@@ -230,10 +139,4 @@ jobs:
         inputs:
           PathtoPublish: $(Build.ArtifactStagingDirectory)
           ArtifactName: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
-      
-      # - task: PublishBuildArtifacts@1
-      #   name: PublishTF
-      #   inputs:
-      #     PathtoPublish: $(Build.SourcesDirectory)
-      #     ArtifactName: tf_${{ parameters.eslzEnvFolder }}_${{ layer }}
       

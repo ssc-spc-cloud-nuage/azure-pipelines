@@ -1,7 +1,7 @@
 parameters:
   - name: eslzEnvs
     type: object
-  - name: checkovSkipChecks
+  - name: checkovArgs
     type: string
   - name: terraformVersion
     type: string
@@ -95,7 +95,7 @@ stages:
           serviceConnection: ${{ eslzEnv.serviceConnection }}
           eslzEnvFolder: ${{ eslzEnv.envName }}
           layers: ${{ eslzEnv.layers }}
-          checkovSkipChecks: ${{ parameters.checkovSkipChecks }}
+          checkovArgs: ${{ parameters.checkovArgs }}
           eslzEnvPool: ${{ eslzEnv.pool }}
 
       - job: PostPlanJob
