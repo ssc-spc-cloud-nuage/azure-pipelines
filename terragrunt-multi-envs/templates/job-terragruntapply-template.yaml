@@ -53,6 +53,7 @@ jobs:
                 downloadPath: '$(Agent.TempDirectory)'
             - task: AzureCLI@2
               displayName: 'terragrunt apply'
+              timeoutInMinutes: 240
               inputs:
                 azureSubscription: ${{ parameters.serviceConnection }}
                 scriptType: bash
