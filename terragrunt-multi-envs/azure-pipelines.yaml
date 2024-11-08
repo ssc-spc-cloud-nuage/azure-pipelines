@@ -11,21 +11,21 @@ resources:
     - repository: templates
       type: github
       name: ssc-spc-cloud-nuage/azure-pipelines
-      ref: refs/tags/v1.0.1
+      ref: refs/tags/v1.1.0
       endpoint: 'gh-ssc-spc-cloud-nuage-sc'
 stages: 
   - template: pipelines/stage-elszenvs-template.yaml
     parameters:
       checkovArgs: '--quiet --skip-check CKV_SECRET_3,CKV2_AZURE_1,CKV2_AZURE_33,CKV_AZURE_33,CKV2_AZURE_38,CKV_AZURE_50,CKV_AZURE_93,CKV2_AZURE_11,CKV2_AZURE_16,\
-                          CKV2_AZURE_17,CKV2_AZURE_22,CKV2_AZURE_48,CKV2_AZURE_31,CKV_AZURE_41,CKV_AZURE_114,CKV_AZURE_20,CKV_AZURE_183,CKV_AZURE_151,\
-                          CKV2_AZURE_35,CKV2_AZURE_36,CKV2_AZURE_32,CKV2_AZURE_24,CKV_AZURE_35,CKV_SECRET_6,CKV_AZURE_235,CKV_AZURE_164,CKV_AZURE_167,CKV_AZURE_166,\
-                          CKV_AZURE_233,CKV_AZURE_149,CKV_AZURE_178,CKV_AZURE_49,CKV_AZURE_17,CKV_AZURE_66,CKV_AZURE_71,CKV_AZURE_63,CKV_AZURE_65,CKV_AZURE_88,CKV_AZURE_16,CKV_AZURE_109,CKV_AZURE_59,CKV_AZURE_244,\
-                          CKV_AZURE_97,CKV_AZURE_231'
+                    CKV2_AZURE_17,CKV2_AZURE_22,CKV2_AZURE_48,CKV2_AZURE_31,CKV_AZURE_41,CKV_AZURE_114,CKV_AZURE_20,CKV_AZURE_183,CKV_AZURE_151,\
+                    CKV2_AZURE_35,CKV2_AZURE_36,CKV2_AZURE_32,CKV2_AZURE_24,CKV_AZURE_35,CKV_SECRET_6,CKV_AZURE_235,CKV_AZURE_164,CKV_AZURE_167,CKV_AZURE_166,\
+                    CKV_AZURE_233,CKV_AZURE_149,CKV_AZURE_178,CKV_AZURE_49,CKV_AZURE_17,CKV_AZURE_66,CKV_AZURE_71,CKV_AZURE_63,CKV_AZURE_65,CKV_AZURE_88,CKV_AZURE_16,\
+                    CKV_AZURE_109,CKV_AZURE_59,CKV_AZURE_244,CKV_AZURE_212,CKV_AZURE_231,CKV_AZURE_225,CKV_AZURE_97,CKV_AZURE_160,CKV_AZURE_9,CKV_AZURE_10,CKV_AZURE_109,CKV2_AZURE_41,CKV2_AZURE_40'
       eslzEnvs:
         - envName: 'dev' # Required. Name of the folder of the environment
           serviceConnection: # Required. Name of the service connection to the subscription
           pool: 'Devops' # Required. Name of the self-hosted agent pool 
           layers: ['L2_blueprint_project'] # Required. name of the folders of the layers tracked for changes
           multiRunID: "" # Optional. Id of the run if the same env is defined multiple times
-      terraformVersion: '1.7.3' # Required. Terraform version to use
-      terragruntVersion: '0.54.22' # Required. Terragrunt version to use
+      terraformVersion: '1.9.8' # Required. Terraform version to use
+      terragruntVersion: '0.68.4' # Required. Terragrunt version to use
