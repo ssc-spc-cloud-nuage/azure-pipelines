@@ -5,7 +5,7 @@ parameters:
     type: string
   - name: eslzEnvFolder
     type: string
-  - name: checkovSkipChecks
+  - name: checkovArgs
     type: string
   - name: eslzEnvPool
     type: string
@@ -17,7 +17,7 @@ jobs:
     dependsOn: InitJob
     condition: and(succeeded(), eq(dependencies.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
     variables:
-      AgentName: $[ dependencies.InitJob.outputs['TFTGInstall.JobAgentName'] ]
+      AgentName: $[ dependencies.InitJob.outputs['InstallTools.JobAgentName'] ]
     pool: 
       name: ${{ parameters.eslzEnvPool }}
       demands: Agent.Name -equals $(AgentName)
@@ -29,7 +29,6 @@ jobs:
           scriptType: bash
           scriptLocation: inlineScript
           addSpnToEnvironment: true
-          visibleAzLogin: false
           inlineScript: |
             export ARM_CLIENT_ID=$servicePrincipalId
             export ARM_OIDC_TOKEN=$idToken
@@ -38,21 +37,27 @@ jobs:
             export ARM_USE_OIDC=true
             export PIPELINE_TOKEN=$(az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query "accessToken" --output tsv)
 
+            # instrumentation_key=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/instkey/a68523ce6abf4d77addf4cfbc247fbd1 --query value -o tsv)
+            # api_key=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/G3Sc-CPMS-MMahdavian-app-insights-appi-api-key/59750d02a3bc498abcf7e30d4d01e936 --query value -o tsv)
+
             echo "##vso[task.setvariable variable=ARMClient;issecret=true]$ARM_CLIENT_ID"
             echo "##vso[task.setvariable variable=OIDCToken;issecret=true]$ARM_OIDC_TOKEN"
             echo "##vso[task.setvariable variable=SubID;issecret=true]$ARM_SUBSCRIPTION_ID"
             echo "##vso[task.setvariable variable=TenantID;issecret=true]$ARM_TENANT_ID"
             echo "##vso[task.setvariable variable=pipelineToken;issecret=true]$PIPELINE_TOKEN"
+            # echo "##vso[task.setvariable variable=instrumentationKey;issecret=true]$instrumentation_key"
+            # echo "##vso[task.setvariable variable=apiKey;issecret=true]$api_key"
 
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt init
-      
+          visibleAzLogin: false      
       - task: bash@3
         name: TerragruntValidate
         inputs:
           targetType: inline
-          failOnStderr: true
+          #failOnStderr: true
           script: |
+            set -e
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt validate
         env:
@@ -67,11 +72,12 @@ jobs:
         name: TerragruntPlan
         inputs:
           targetType: inline
-          failOnStderr: true
-          script: |         
+          failOnStderr: false
+          script: |  
+            set -e       
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt plan --out=$(Build.ArtifactStagingDirectory)/plan.tfplan
-            terragrunt show -no-color $(Build.ArtifactStagingDirectory)/plan.tfplan > $(Build.ArtifactStagingDirectory)/plan_${{ layer }}.txt
+            terragrunt show -no-color --terragrunt-forward-tf-stdout $(Build.ArtifactStagingDirectory)/plan.tfplan > $(Build.ArtifactStagingDirectory)/plan_${{ layer }}.txt
         env:
           ARM_CLIENT_ID: $(ARMClient)
           ARM_TENANT_ID: $(TenantID)
@@ -79,6 +85,7 @@ jobs:
           ARM_OIDC_TOKEN: $(OIDCToken)
           ARM_USE_OIDC: true
           PIPELINE_TOKEN: $(pipelineToken)
+          SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
       - task: bash@3
         name: Checkov
@@ -87,7 +94,7 @@ jobs:
           script: |
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json 
-            checkov -f plan.json --skip-check ${{ parameters.checkovSkipChecks }} --quiet
+            checkov -f plan.json ${{ parameters.checkovArgs }}
         env:
           ARM_CLIENT_ID: $(ARMClient)
           ARM_TENANT_ID: $(TenantID)
@@ -95,7 +102,6 @@ jobs:
           ARM_OIDC_TOKEN: $(OIDCToken)
           ARM_USE_OIDC: true
           PIPELINE_TOKEN: $(pipelineToken)
-
 
       - task: bash@3
         name: CommentPlanOnPR
@@ -132,10 +138,4 @@ jobs:
         inputs:
           PathtoPublish: $(Build.ArtifactStagingDirectory)
           ArtifactName: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
-      
-      - task: PublishBuildArtifacts@1
-        name: PublishTF
-        inputs:
-          PathtoPublish: $(Build.SourcesDirectory)
-          ArtifactName: tf_${{ parameters.eslzEnvFolder }}_${{ layer }}
       

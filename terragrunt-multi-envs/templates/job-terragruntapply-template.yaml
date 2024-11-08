@@ -9,7 +9,10 @@ parameters:
     type: string
   - name: multiRunID
     type: string
-
+  - name: terraformVersion
+    type: string
+  - name: terragruntVersion
+    type: string
 
 jobs:
 - ${{ each layer in parameters.layers }}:  
@@ -27,27 +30,20 @@ jobs:
                 if [ ! -d "$(Agent.ToolsDirectory)/.tfenv" ]; then
                 git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tfenv.git $(Agent.ToolsDirectory)/.tfenv
                 echo 'export PATH=$(Agent.ToolsDirectory)/.tfenv/bin:$PATH' >> ~/.profile
-                $(Agent.ToolsDirectory)/.tfenv/bin/tfenv install 1.9.1
-                $(Agent.ToolsDirectory)/.tfenv/bin/tfenv use 1.9.1
+                $(Agent.ToolsDirectory)/.tfenv/bin/tfenv install ${{ parameters.terraformVersion }}
+                $(Agent.ToolsDirectory)/.tfenv/bin/tfenv use ${{ parameters.terraformVersion }}
                 fi
 
                 if [ ! -d "$(Agent.ToolsDirectory)/.tgenv" ]; then
                 git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tgenv.git $(Agent.ToolsDirectory)/.tgenv
                 echo 'export PATH=$(Agent.ToolsDirectory)/.tgenv/bin:$PATH' >> ~/.profile
-                $(Agent.ToolsDirectory)/.tgenv/bin/tgenv install 0.66.9
-                $(Agent.ToolsDirectory)/.tgenv/bin/tgenv use 0.66.9
+                $(Agent.ToolsDirectory)/.tgenv/bin/tgenv install ${{ parameters.terragruntVersion }}
+                $(Agent.ToolsDirectory)/.tgenv/bin/tgenv use ${{ parameters.terragruntVersion }}
                 fi
 
                 source ~/.profile
             
               displayName: 'install terraform/terragrunt'
-            - task: DownloadBuildArtifacts@1
-              name: DownloadTF
-              inputs:
-                buildType: current
-                downloadType: single
-                artifactName: tf_${{ parameters.eslzEnvFolder}}_${{ layer }}
-                downloadPath: '$(Build.SourcesDirectory)'
             - task: DownloadBuildArtifacts@1
               name: DownloadPlan
               inputs:
@@ -57,21 +53,34 @@ jobs:
                 downloadPath: '$(Agent.TempDirectory)'
             - task: AzureCLI@2
               displayName: 'terragrunt apply'
+              timeoutInMinutes: 240
               inputs:
                 azureSubscription: ${{ parameters.serviceConnection }}
                 scriptType: bash
                 scriptLocation: inlineScript
                 addSpnToEnvironment: true
-                failOnStandardError : true
-                visibleAzLogin: false
+                failOnStandardError : false
                 inlineScript: |
+                  set -e
                   export ARM_CLIENT_ID=$servicePrincipalId
                   export ARM_OIDC_TOKEN=$idToken
                   export ARM_TENANT_ID=$tenantId
                   export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
                   export ARM_USE_OIDC=true
                   export PIPELINE_TOKEN=$(az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query "accessToken" --output tsv)
+                  export TERRAGRUNT_PIPELINE_RUN=true
+                  # export instrumentationKey=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/instkey/a68523ce6abf4d77addf4cfbc247fbd1 --query value -o tsv)
+                  # export apiKey=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/G3Sc-CPMS-MMahdavian-app-insights-appi-api-key/59750d02a3bc498abcf7e30d4d01e936 --query value -o tsv)
+
+                  # echo "##vso[task.setvariable variable=instrumentationKey;issecret=true]$instrumentationKey"
+                  # echo "##vso[task.setvariable variable=apiKey;issecret=true]$apiKey"
 
                   cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
                   terragrunt apply -auto-approve $(Agent.TempDirectory)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan
 
+                  # applyExitCode=$?
+                  
+                  # echo "##vso[task.setvariable variable=applyExitCode;issecret=true]$applyExitCode"
+                visibleAzLogin: false
+              env:
+                SYSTEM_ACCESSTOKEN: $(System.AccessToken)
