@@ -29,7 +29,6 @@ jobs:
           scriptType: bash
           scriptLocation: inlineScript
           addSpnToEnvironment: true
-          visibleAzLogin: false
           inlineScript: |
             export ARM_CLIENT_ID=$servicePrincipalId
             export ARM_OIDC_TOKEN=$idToken
@@ -51,7 +50,7 @@ jobs:
 
             cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt init
-      
+          visibleAzLogin: false      
       - task: bash@3
         name: TerragruntValidate
         inputs:
