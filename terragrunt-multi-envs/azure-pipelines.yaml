@@ -27,5 +27,6 @@ stages:
           pool: 'Devops' # Required. Name of the self-hosted agent pool 
           layers: ['L2_blueprint_project'] # Required. name of the folders of the layers tracked for changes
           multiRunID: "" # Optional. Id of the run if the same env is defined multiple times
+      rootEnvFolder: "landing_zones_*"
       terraformVersion: '1.9.8' # Required. Terraform version to use
       terragruntVersion: '0.68.4' # Required. Terragrunt version to use

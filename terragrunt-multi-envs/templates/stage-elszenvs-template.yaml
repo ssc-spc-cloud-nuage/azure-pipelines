@@ -1,7 +1,9 @@
 parameters:
+  - name: checkovArgs
+    type: string
   - name: eslzEnvs
     type: object
-  - name: checkovArgs
+  - name: rootEnvFolder
     type: string
   - name: terraformVersion
     type: string
@@ -97,7 +99,7 @@ stages:
           layers: ${{ eslzEnv.layers }}
           checkovArgs: ${{ parameters.checkovArgs }}
           eslzEnvPool: ${{ eslzEnv.pool }}
-
+          rootEnvFolder: ${{ parameters.rootEnvFolder }}
       - job: PostPlanJob
         dependsOn:
         - InitJob
@@ -168,5 +170,6 @@ stages:
           layers: ${{ eslzEnv.layers }}
           eslzEnvPool: ${{ eslzEnv.pool }}
           multiRunID: ${{ eslzEnv.multiRunID }}
+          rootEnvFolder: ${{ parameters.rootEnvFolder }}
           terraformVersion: ${{ parameters.terraformVersion }} 
           terragruntVersion: ${{ parameters.terragruntVersion }}

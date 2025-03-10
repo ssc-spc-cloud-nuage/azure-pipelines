@@ -9,7 +9,8 @@ parameters:
     type: string
   - name: eslzEnvPool
     type: string
-
+  - name: rootEnvFolder
+    type: string
 
 jobs:
 - ${{ each layer in parameters.layers }}:  
@@ -48,7 +49,7 @@ jobs:
             # echo "##vso[task.setvariable variable=instrumentationKey;issecret=true]$instrumentation_key"
             # echo "##vso[task.setvariable variable=apiKey;issecret=true]$api_key"
 
-            cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
+            cd $(Build.SourcesDirectory)/${{ parameters.rootEnvFolder }}/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt init
           visibleAzLogin: false      
       - task: bash@3
@@ -58,7 +59,7 @@ jobs:
           #failOnStderr: true
           script: |
             set -e
-            cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
+            cd $(Build.SourcesDirectory)/${{ parameters.rootEnvFolder }}/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt validate
         env:
           ARM_CLIENT_ID: $(ARMClient)
@@ -75,7 +76,7 @@ jobs:
           failOnStderr: false
           script: |  
             set -e       
-            cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
+            cd $(Build.SourcesDirectory)/${{ parameters.rootEnvFolder }}/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt plan --out=$(Build.ArtifactStagingDirectory)/plan.tfplan
             terragrunt show -no-color --terragrunt-forward-tf-stdout $(Build.ArtifactStagingDirectory)/plan.tfplan > $(Build.ArtifactStagingDirectory)/plan_${{ layer }}.txt
         env:
@@ -92,7 +93,7 @@ jobs:
         inputs: 
           targetType: inline
           script: |
-            cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
+            cd $(Build.SourcesDirectory)/${{ parameters.rootEnvFolder }}/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json 
             checkov -f plan.json ${{ parameters.checkovArgs }}
         env:
