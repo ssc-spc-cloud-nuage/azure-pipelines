@@ -9,6 +9,8 @@ parameters:
     type: string
   - name: multiRunID
     type: string
+  - name: rootEnvFolder
+    type: string
   - name: terraformVersion
     type: string
   - name: terragruntVersion
