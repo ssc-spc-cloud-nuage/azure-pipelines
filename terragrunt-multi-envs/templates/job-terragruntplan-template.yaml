@@ -13,9 +13,12 @@ parameters:
     type: string
 
 variables:
-  projectName: $(System.TeamProject)
-  repoName: $(Build.Repository.Name)
-  repoRef: $(Build.SourceBranch)
+  - name: projectName
+    value: $(System.TeamProject)
+  - name: repoName
+    value: $(Build.Repository.Name)
+  - name: repoRef
+    value: $(Build.SourceBranch)
 
 jobs:
 - ${{ each layer in parameters.layers }}:  
