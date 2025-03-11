@@ -19,7 +19,7 @@ jobs:
     condition: and(succeeded(), eq(dependencies.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
     variables:
       - name: AgentName
-      - value: $[ dependencies.InitJob.outputs['InstallTools.JobAgentName'] ]
+        value: $[ dependencies.InitJob.outputs['InstallTools.JobAgentName'] ]
       - name: projectName
         value: $(System.TeamProject)
       - name: repoName
