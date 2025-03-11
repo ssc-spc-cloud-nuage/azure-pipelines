@@ -10,12 +10,12 @@ parameters:
   - name: terragruntVersion
     type: string
 
-resources:
-  repositories:
-    - repository: tfcode
-      type: git
-      name: $(Build.Repository.Name)
-      ref: $(Build.SourceBranch)
+# resources:
+#   repositories:
+#     - repository: tfcode
+#       type: git
+#       name: $(Build.Repository.Name)
+#       ref: $(Build.SourceBranch)
 stages: 
 - ${{ each eslzEnv in parameters.eslzEnvs }}:  
   - stage: ${{ eslzEnv.envName }}_Plan_${{ eslzEnv.multiRunID }}
