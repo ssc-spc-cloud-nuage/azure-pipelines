@@ -23,7 +23,7 @@ jobs:
       name: ${{ parameters.eslzEnvPool }}
       demands: Agent.Name -equals $(AgentName)
     steps:
-      - checkout: git://$(System.TeamProject)/$(Build.Repository.Name)@$(Build.SourceBranch)
+      - checkout: git://$(System.TeamProject)/CPMS-MMahdavian@$(Build.SourceBranch)
       - task: AzureCLI@2
         name: TerragruntInit
         inputs:
