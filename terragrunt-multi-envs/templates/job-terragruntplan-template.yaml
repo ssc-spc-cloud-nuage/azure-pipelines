@@ -12,6 +12,11 @@ parameters:
   - name: rootEnvFolder
     type: string
 
+variables:
+  projectName: $(System.TeamProject)
+  repoName: $(Build.Repository.Name)
+  repoRef: $(Build.SourceBranch)
+
 jobs:
 - ${{ each layer in parameters.layers }}:  
   - job: TerragruntPlan_${{ parameters.eslzEnvFolder}}_${{ layer }}
@@ -23,7 +28,7 @@ jobs:
       name: ${{ parameters.eslzEnvPool }}
       demands: Agent.Name -equals $(AgentName)
     steps:
-      - checkout: git://CPMS-MMahdavian/CPMS-MMahdavian@${{ Build.SourceBranch }}
+      - checkout: git://CPMS-MMahdavian/CPMS-MMahdavian@${{ variables.repoRef}}
       - task: AzureCLI@2
         name: TerragruntInit
         inputs:
