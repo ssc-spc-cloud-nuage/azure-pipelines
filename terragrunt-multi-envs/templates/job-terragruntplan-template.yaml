@@ -18,19 +18,12 @@ jobs:
     dependsOn: InitJob
     condition: and(succeeded(), eq(dependencies.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
     variables:
-      - name: AgentName
-        value: $[ dependencies.InitJob.outputs['InstallTools.JobAgentName'] ]
-      # - name: projectName
-      #   value: $(System.TeamProject)
-      # - name: repoName
-      #   value: $(Build.Repository.Name)
-      - name: repoRef
-        value: $(Build.SourceBranch)
+      AgentName: $[ dependencies.InitJob.outputs['InstallTools.JobAgentName'] ]
     pool: 
       name: ${{ parameters.eslzEnvPool }}
       demands: Agent.Name -equals $(AgentName)
     steps:
-      - checkout: git://CPMS-MMahdavian/CPMS-MMahdavian@${{ variables.repoRef}}
+      - checkout: tfcode
       - task: AzureCLI@2
         name: TerragruntInit
         inputs:
