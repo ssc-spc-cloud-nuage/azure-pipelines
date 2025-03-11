@@ -20,10 +20,10 @@ jobs:
     variables:
       - name: AgentName
         value: $[ dependencies.InitJob.outputs['InstallTools.JobAgentName'] ]
-      - name: projectName
-        value: $(System.TeamProject)
-      - name: repoName
-        value: $(Build.Repository.Name)
+      # - name: projectName
+      #   value: $(System.TeamProject)
+      # - name: repoName
+      #   value: $(Build.Repository.Name)
       - name: repoRef
         value: $(Build.SourceBranch)
     pool: 
