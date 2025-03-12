@@ -47,7 +47,7 @@ jobs:
 
             # Scripted checkout instead of azure devops built-in task
             repoDir=$(Build.SourcesDirectory)
-            rm -rf $repoDir/*
+            rm -rf $repoDir
             mkdir $repoDir
             cd $repoDir
             ls -la
