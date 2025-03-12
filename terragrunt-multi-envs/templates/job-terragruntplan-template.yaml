@@ -45,12 +45,12 @@ jobs:
             echo "##vso[task.setvariable variable=TenantID;issecret=true]$ARM_TENANT_ID"
             echo "##vso[task.setvariable variable=pipelineToken;issecret=true]$PIPELINE_TOKEN"
 
-            #
+            # Scripted checkout instead of azure devops built-in task
             repoDir=$(Build.SourcesDirectory)
-            /bin/rm -rf $repoDir
-            urlWithToken=$(echo $(System.CollectionUri) | sed -e "s/https\:\/\//https\:\/\/$SYSTEM_ACCESSTOKEN\@/g")
-            git clone $urlWithToken/$(System.TeamProject)/_git/$(Build.Repository.Name) $repoDir
+            /bin/rm -rf $repoDir/*
             cd $repoDir
+            urlWithToken=$(echo $(System.CollectionUri) | sed -e "s/https\:\/\//https\:\/\/$SYSTEM_ACCESSTOKEN\@/g")
+            git clone $urlWithToken/$(System.TeamProject)/_git/$(Build.Repository.Name) .
             git fetch origin '$(Build.SourceBranch)':'localBranch'
             git checkout localBranch
 
