@@ -50,7 +50,6 @@ jobs:
             rm -rf $repoDir
             mkdir $repoDir
             cd $repoDir
-            ls -la
             urlWithToken=$(echo $(System.CollectionUri) | sed -e "s/https\:\/\//https\:\/\/$SYSTEM_ACCESSTOKEN\@/g")
             git clone --depth=1 $urlWithToken/$(System.TeamProject)/_git/$(Build.Repository.Name) $repoDir
             git fetch --depth=1 origin '$(Build.SourceBranch)':'localBranch'
