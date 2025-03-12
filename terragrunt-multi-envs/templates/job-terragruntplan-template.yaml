@@ -47,8 +47,9 @@ jobs:
 
             # Scripted checkout instead of azure devops built-in task
             repoDir=$(Build.SourcesDirectory)
-            /bin/rm -rf $repoDir/*
+            rm -rf $repoDir/*
             cd $repoDir
+            ls
             urlWithToken=$(echo $(System.CollectionUri) | sed -e "s/https\:\/\//https\:\/\/$SYSTEM_ACCESSTOKEN\@/g")
             git clone --depth=1 $urlWithToken/$(System.TeamProject)/_git/$(Build.Repository.Name) .
             git fetch --depth=1 origin '$(Build.SourceBranch)':'localBranch'
