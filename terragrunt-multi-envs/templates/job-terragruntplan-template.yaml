@@ -50,10 +50,9 @@ jobs:
             /bin/rm -rf $repoDir/*
             cd $repoDir
             urlWithToken=$(echo $(System.CollectionUri) | sed -e "s/https\:\/\//https\:\/\/$SYSTEM_ACCESSTOKEN\@/g")
-            git clone --single-branch --branch $(Build.SourceBranch) $urlWithToken/$(System.TeamProject)/_git/$(Build.Repository.Name) .
-            #git clone $urlWithToken/$(System.TeamProject)/_git/$(Build.Repository.Name) .
-            #git fetch origin '$(Build.SourceBranch)':'localBranch'
-            #git checkout localBranch
+            git clone --depth=1 $urlWithToken/$(System.TeamProject)/_git/$(Build.Repository.Name) .
+            git fetch --depth=1 origin '$(Build.SourceBranch)':'localBranch'
+            git checkout localBranch
 
             cd $(Build.SourcesDirectory)/${{ parameters.rootEnvFolder }}/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt init
