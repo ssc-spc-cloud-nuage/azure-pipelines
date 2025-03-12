@@ -48,6 +48,7 @@ jobs:
             # Scripted checkout instead of azure devops built-in task
             repoDir=$(Build.SourcesDirectory)
             rm -rf $repoDir/*
+            mkdir $repoDir
             cd $repoDir
             ls -la
             urlWithToken=$(echo $(System.CollectionUri) | sed -e "s/https\:\/\//https\:\/\/$SYSTEM_ACCESSTOKEN\@/g")
