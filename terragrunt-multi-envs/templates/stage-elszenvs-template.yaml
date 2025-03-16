@@ -82,6 +82,7 @@ stages:
               echo $(Build.Repository.Name)
               echo $(Build.Repository.Uri)
               echo $(Build.SourceBranch)
+              echo $(System.PullRequest.SourceRepositoryURI)
               echo "$LAYERS_JSON" | jq -r '.[]' | while read -r layername; do
                   foldertocheck="${{ eslzEnv.envName }}/$layername/"
                   if [[ "$changedFiles" =~ $foldertocheck ]]; then
