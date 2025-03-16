@@ -79,7 +79,9 @@ stages:
               changedFiles=$(curl -s -H "Authorization: Bearer $SYSTEM_ACCESSTOKEN" -H "Content-Type: application/json" "$(System.CollectionUri)$(System.TeamProject)/_apis/git/repositories/$(Build.Repository.ID)/diffs/commits?baseVersion=$defaultBranch&targetVersion=$sourceBranch&api-version=7.1" | jq '.changes[].item.path')
               echo '$(System.CollectionUri)$(System.TeamProject)/_apis/git/repositories/$(Build.Repository.ID)/diffs/commits?baseVersion=$defaultBranch&targetVersion=$sourceBranch&api-version=7.1"'
               echo $(Build.Repository.ID)
-              echo $chagedFiles
+              echo $(Build.Repository.Name)
+              echo $(Build.Repository.Uri)
+              echo $(Build.SourceBranch)
               echo "$LAYERS_JSON" | jq -r '.[]' | while read -r layername; do
                   foldertocheck="${{ eslzEnv.envName }}/$layername/"
                   if [[ "$changedFiles" =~ $foldertocheck ]]; then
