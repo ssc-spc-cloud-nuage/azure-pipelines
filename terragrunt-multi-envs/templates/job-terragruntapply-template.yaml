@@ -9,6 +9,8 @@ parameters:
     type: string
   - name: multiRunID
     type: string
+  - name: rootEnvFolder
+    type: string
   - name: terraformVersion
     type: string
   - name: terragruntVersion
@@ -26,6 +28,7 @@ jobs:
         deploy:
           steps:
             - download: none
+            #- checkout: self # removed due multiple issues. Using scripted checkout instead.
             - bash: |
                 if [ ! -d "$(Agent.ToolsDirectory)/.tfenv" ]; then
                 git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tfenv.git $(Agent.ToolsDirectory)/.tfenv
@@ -69,13 +72,18 @@ jobs:
                   export ARM_USE_OIDC=true
                   export PIPELINE_TOKEN=$(az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query "accessToken" --output tsv)
                   export TERRAGRUNT_PIPELINE_RUN=true
-                  # export instrumentationKey=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/instkey/a68523ce6abf4d77addf4cfbc247fbd1 --query value -o tsv)
-                  # export apiKey=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/G3Sc-CPMS-MMahdavian-app-insights-appi-api-key/59750d02a3bc498abcf7e30d4d01e936 --query value -o tsv)
 
-                  # echo "##vso[task.setvariable variable=instrumentationKey;issecret=true]$instrumentationKey"
-                  # echo "##vso[task.setvariable variable=apiKey;issecret=true]$apiKey"
+                  # Scripted checkout instead of azure devops built-in task
+                  repoDir=$(Build.SourcesDirectory)
+                  rm -rf $repoDir
+                  mkdir $repoDir
+                  cd $repoDir
+                  urlWithToken=$(echo $(System.CollectionUri) | sed -e "s/https\:\/\//https\:\/\/$SYSTEM_ACCESSTOKEN\@/g")
+                  git clone --depth=1 $urlWithToken/$(System.TeamProject)/_git/$(Build.Repository.Name) $repoDir
+                  git fetch --depth=1 origin '$(Build.SourceBranch)':'localBranch'
+                  git checkout localBranch
 
-                  cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
+                  cd $(Build.SourcesDirectory)/${{ parameters.rootEnvFolder }}/${{ parameters.eslzEnvFolder}}/${{ layer }}/
                   terragrunt apply -auto-approve $(Agent.TempDirectory)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan
 
                   # applyExitCode=$?

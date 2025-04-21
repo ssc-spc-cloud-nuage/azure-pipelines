@@ -1,7 +1,9 @@
 parameters:
+  - name: checkovArgs
+    type: string
   - name: eslzEnvs
     type: object
-  - name: checkovArgs
+  - name: rootEnvFolder
     type: string
   - name: terraformVersion
     type: string
@@ -69,9 +71,6 @@ stages:
               fi
               defaultBranch=$(curl -s -H "Authorization: Bearer $SYSTEM_ACCESSTOKEN" -H "Content-Type: application/json" "$(System.CollectionUri)$(System.TeamProject)/_apis/git/repositories/$(Build.Repository.ID)?api-version=7.1-preview.1" | jq -r .defaultBranch | sed 's|refs/heads/||')
               changedFiles=$(curl -s -H "Authorization: Bearer $SYSTEM_ACCESSTOKEN" -H "Content-Type: application/json" "$(System.CollectionUri)$(System.TeamProject)/_apis/git/repositories/$(Build.Repository.ID)/diffs/commits?baseVersion=$defaultBranch&targetVersion=$sourceBranch&api-version=7.1" | jq '.changes[].item.path')
-              echo $defaultBranch
-              echo "--------"
-              echo $changedFiles
               echo "$LAYERS_JSON" | jq -r '.[]' | while read -r layername; do
                   foldertocheck="${{ eslzEnv.envName }}/$layername/"
                   if [[ "$changedFiles" =~ $foldertocheck ]]; then
@@ -97,7 +96,7 @@ stages:
           layers: ${{ eslzEnv.layers }}
           checkovArgs: ${{ parameters.checkovArgs }}
           eslzEnvPool: ${{ eslzEnv.pool }}
-
+          rootEnvFolder: ${{ parameters.rootEnvFolder }}
       - job: PostPlanJob
         dependsOn:
         - InitJob
@@ -168,5 +167,6 @@ stages:
           layers: ${{ eslzEnv.layers }}
           eslzEnvPool: ${{ eslzEnv.pool }}
           multiRunID: ${{ eslzEnv.multiRunID }}
+          rootEnvFolder: ${{ parameters.rootEnvFolder }}
           terraformVersion: ${{ parameters.terraformVersion }} 
           terragruntVersion: ${{ parameters.terragruntVersion }}

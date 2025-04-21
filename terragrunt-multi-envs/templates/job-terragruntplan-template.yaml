@@ -9,7 +9,8 @@ parameters:
     type: string
   - name: eslzEnvPool
     type: string
-
+  - name: rootEnvFolder
+    type: string
 
 jobs:
 - ${{ each layer in parameters.layers }}:  
@@ -22,6 +23,7 @@ jobs:
       name: ${{ parameters.eslzEnvPool }}
       demands: Agent.Name -equals $(AgentName)
     steps:
+      - checkout: none # Implementing scripted checkout in init task due to multiple bugs with remote repo checkout : https://github.com/microsoft/azure-pipelines-agent/issues/4078
       - task: AzureCLI@2
         name: TerragruntInit
         inputs:
@@ -37,20 +39,27 @@ jobs:
             export ARM_USE_OIDC=true
             export PIPELINE_TOKEN=$(az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query "accessToken" --output tsv)
 
-            # instrumentation_key=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/instkey/a68523ce6abf4d77addf4cfbc247fbd1 --query value -o tsv)
-            # api_key=$(az keyvault secret show --id https://g3scckv-cpms-mma-f07c-kv.vault.azure.net/secrets/G3Sc-CPMS-MMahdavian-app-insights-appi-api-key/59750d02a3bc498abcf7e30d4d01e936 --query value -o tsv)
-
             echo "##vso[task.setvariable variable=ARMClient;issecret=true]$ARM_CLIENT_ID"
             echo "##vso[task.setvariable variable=OIDCToken;issecret=true]$ARM_OIDC_TOKEN"
             echo "##vso[task.setvariable variable=SubID;issecret=true]$ARM_SUBSCRIPTION_ID"
             echo "##vso[task.setvariable variable=TenantID;issecret=true]$ARM_TENANT_ID"
             echo "##vso[task.setvariable variable=pipelineToken;issecret=true]$PIPELINE_TOKEN"
-            # echo "##vso[task.setvariable variable=instrumentationKey;issecret=true]$instrumentation_key"
-            # echo "##vso[task.setvariable variable=apiKey;issecret=true]$api_key"
 
-            cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
+            # Scripted checkout instead of azure devops built-in task
+            repoDir=$(Build.SourcesDirectory)
+            rm -rf $repoDir
+            mkdir $repoDir
+            cd $repoDir
+            urlWithToken=$(echo $(System.CollectionUri) | sed -e "s/https\:\/\//https\:\/\/$SYSTEM_ACCESSTOKEN\@/g")
+            git clone --depth=1 $urlWithToken/$(System.TeamProject)/_git/$(Build.Repository.Name) $repoDir
+            git fetch --depth=1 origin '$(Build.SourceBranch)':'localBranch'
+            git checkout localBranch
+
+            cd $(Build.SourcesDirectory)/${{ parameters.rootEnvFolder }}/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt init
-          visibleAzLogin: false      
+          visibleAzLogin: false
+        env:
+          SYSTEM_ACCESSTOKEN: $(System.AccessToken)
       - task: bash@3
         name: TerragruntValidate
         inputs:
@@ -58,7 +67,7 @@ jobs:
           #failOnStderr: true
           script: |
             set -e
-            cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
+            cd $(Build.SourcesDirectory)/${{ parameters.rootEnvFolder }}/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt validate
         env:
           ARM_CLIENT_ID: $(ARMClient)
@@ -75,7 +84,7 @@ jobs:
           failOnStderr: false
           script: |  
             set -e       
-            cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
+            cd $(Build.SourcesDirectory)/${{ parameters.rootEnvFolder }}/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt plan --out=$(Build.ArtifactStagingDirectory)/plan.tfplan
             terragrunt show -no-color --terragrunt-forward-tf-stdout $(Build.ArtifactStagingDirectory)/plan.tfplan > $(Build.ArtifactStagingDirectory)/plan_${{ layer }}.txt
         env:
@@ -92,7 +101,7 @@ jobs:
         inputs: 
           targetType: inline
           script: |
-            cd $(Build.SourcesDirectory)/landing_zones_*/${{ parameters.eslzEnvFolder}}/${{ layer }}/
+            cd $(Build.SourcesDirectory)/${{ parameters.rootEnvFolder }}/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt show -json $(Build.ArtifactStagingDirectory)/plan.tfplan > plan.json 
             checkov -f plan.json ${{ parameters.checkovArgs }}
         env:
