@@ -15,7 +15,9 @@ parameters:
 jobs:
 - ${{ each layer in parameters.layers }}:  
   - job: TerragruntPlan_${{ parameters.eslzEnvFolder}}_${{ layer }}
-    dependsOn: InitJob
+    dependsOn: 
+      - InitJob
+      - RestrictedFilesValidation
     condition: and(succeeded(), eq(dependencies.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
     variables:
       AgentName: $[ dependencies.InitJob.outputs['InstallTools.JobAgentName'] ]
