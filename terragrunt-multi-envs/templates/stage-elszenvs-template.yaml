@@ -81,13 +81,35 @@ stages:
                       echo "##vso[task.setvariable variable=RepoChange$layername;isOutput=true]false"
                   fi
               done
+
+              for file in $(echo "$changedFiles" | tr -d '"'); do
+                  filename=$(basename "$file")
+                  if [[ "$filename" == "root.hcl" || "$filename" == "terragrunt.hcl" || "$filename" == *.sh ]]; then
+                      echo "Restricted file change detected: $filename"
+                      echo "##vso[task.setvariable variable=RestrictedFileChange;isOutput=true]true"
+                      break
+                  fi
+              done
             name: GitDiffTask
             failOnStderr: True
             env:
               LAYERS_JSON: ${{ convertToJson(eslzEnv.layers) }}
               SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
-
+      - job: RestrictedFilesValidation
+        displayName: 'Manual Validation for Restricted Files'
+        pool: server
+        dependsOn: InitJob
+        condition: and(succeeded(), eq(dependencies.InitJob.outputs['GitDiffTask.RestrictedFileChange'], 'true'))
+        steps:
+          - task: ManualValidation@1
+            name: CheckRestrictedFilesChanges
+            inputs:
+              notifyUsers: ''
+              approvers: 'Project Collection Administrators'
+              instructions: 'Please review the changes in the restricted files (root.hcl, terragrunt.hcl, or shell scripts) before proceeding with the plan. If you are sure about the changes, please approve this step to continue.'
+              onTimeout: 'reject'
+              timeoutInMinutes: 1440
 
       - template: /terragrunt-multi-envs/templates/job-terragruntplan-template.yaml@templates
         parameters:
