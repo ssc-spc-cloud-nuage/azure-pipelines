@@ -11,7 +11,7 @@ resources:
     - repository: templates
       type: github
       name: ssc-spc-cloud-nuage/azure-pipelines
-      ref: refs/tags/v1.1.0
+      ref: refs/tags/v1.3.0
       endpoint: 'gh-ssc-spc-cloud-nuage-sc'
 stages: 
   - template: pipelines/stage-elszenvs-template.yaml
