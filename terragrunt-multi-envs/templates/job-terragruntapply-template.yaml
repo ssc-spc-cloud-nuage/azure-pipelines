@@ -30,6 +30,8 @@ jobs:
             - download: none
             #- checkout: self # removed due multiple issues. Using scripted checkout instead.
             - bash: |
+                set -euo pipefail
+
                 if [ ! -d "$(Agent.ToolsDirectory)/.tfenv" ]; then
                 git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tfenv.git $(Agent.ToolsDirectory)/.tfenv
                 echo 'export PATH=$(Agent.ToolsDirectory)/.tfenv/bin:$PATH' >> ~/.profile
