@@ -60,6 +60,8 @@ jobs:
             git checkout localBranch
 
             cd $(Build.SourcesDirectory)/${{ parameters.rootEnvFolder }}/${{ parameters.eslzEnvFolder}}/${{ layer }}/
+
+            terraform --version
             terragrunt init
           visibleAzLogin: false
         env:
