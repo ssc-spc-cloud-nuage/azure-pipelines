@@ -13,7 +13,6 @@ parameters:
 stages: 
 - ${{ each eslzEnv in parameters.eslzEnvs }}:  
   - stage: ${{ eslzEnv.envName }}_Plan_${{ eslzEnv.multiRunID }}
-    dependsOn: StartAgents # added to start ACI
     condition: always()
     jobs:
       - job: InitJob
