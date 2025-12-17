@@ -85,8 +85,8 @@ stages:
         - ${{ each layer in eslzEnv.layers }}:
           - TerragruntPlan_${{ eslzEnv.envName }}_${{ layer }}
         condition: always()  
-        pool: 
-          name: ${{ eslzEnv.pool }}
+        # pool: 
+        #   name: ${{ eslzEnv.pool }}
         steps:
           - checkout: none
           - download: current 
