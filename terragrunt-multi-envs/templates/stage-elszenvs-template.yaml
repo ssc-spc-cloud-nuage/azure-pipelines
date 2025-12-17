@@ -93,6 +93,8 @@ stages:
             # condition: in(dependencies['TerragruntPlan_${{ eslzEnv.envName }}_${{ layer }}'].result, 'Succeeded')
             # artifact: plan_${{ eslzEnv.envName }}_${{ layer }}
           - bash: |
+              ls -l $(Pipeline.Workspace)
+
               # echo "##vso[task.setvariable variable=PlanChange;isOutput=true]false"
               echo "$LAYERS_JSON" | jq -r '.[]' | while read -r layername; do
                 if [[ -f $(Pipeline.Workspace)/plan_${{ eslzEnv.envName }}_$layername/plan_$layername.txt ]]; then
