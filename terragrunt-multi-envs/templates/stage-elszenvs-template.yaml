@@ -91,7 +91,7 @@ stages:
           - checkout: none
           - ${{ each layer in eslzEnv.layers }}:
             - download: current 
-              condition: eq(dependencies.TerragruntPlan_${{ eslzEnv.envName }}_${{ layer }}.result, 'Succeeded')
+              condition: succeeded('TerragruntPlan_${{ eslzEnv.envName }}_${{ layer }}')
               artifact: plan_${{ eslzEnv.envName }}_${{ layer }}
               patterns: "*/plan*.txt"
           - bash: |
