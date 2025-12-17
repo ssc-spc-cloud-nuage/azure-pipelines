@@ -89,11 +89,10 @@ stages:
           name: ${{ eslzEnv.pool }}
         steps:
           - checkout: none
-          - ${{ each layer in eslzEnv.layers }}:
-            - download: current 
-              condition: in(dependencies['TerragruntPlan_${{ eslzEnv.envName }}_${{ layer }}'].result, 'Succeeded')
-              artifact: plan_${{ eslzEnv.envName }}_${{ layer }}
-              patterns: "*/plan*.txt"
+          - download: current 
+            # condition: in(dependencies['TerragruntPlan_${{ eslzEnv.envName }}_${{ layer }}'].result, 'Succeeded')
+            # artifact: plan_${{ eslzEnv.envName }}_${{ layer }}
+            patterns: "*/plan*.txt"
           - bash: |
               # echo "##vso[task.setvariable variable=PlanChange;isOutput=true]false"
               echo "$LAYERS_JSON" | jq -r '.[]' | while read -r layername; do
