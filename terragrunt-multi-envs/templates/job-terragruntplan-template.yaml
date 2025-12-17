@@ -148,9 +148,6 @@ jobs:
           BUILD_REPOSITORYID: $(Build.Repository.ID)
           SYSTEM_PULLREQUEST_PULLREQUESTID: $(System.PullRequest.PullRequestId)
 
-      - task: PublishBuildArtifacts@1
-        name: PublishPlan
-        inputs:
-          PathtoPublish: $(Build.ArtifactStagingDirectory)
-          ArtifactName: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
+      - publish: $(Build.ArtifactStagingDirectory)
+        artifact: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
       

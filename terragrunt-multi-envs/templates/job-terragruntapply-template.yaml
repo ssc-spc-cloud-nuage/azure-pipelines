@@ -27,15 +27,9 @@ jobs:
       runOnce:
         deploy:
           steps:
-            - download: none
-            #- checkout: self # removed due multiple issues. Using scripted checkout instead.
-            - task: DownloadBuildArtifacts@1
-              name: DownloadPlan
-              inputs:
-                buildType: current
-                downloadType: single
-                artifactName: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
-                downloadPath: '$(Agent.TempDirectory)'
+            - download: current
+              artifact: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
+              target: '$(Agent.TempDirectory)'
             - task: AzureCLI@2
               displayName: 'terragrunt apply'
               timeoutInMinutes: 240
