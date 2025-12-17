@@ -89,18 +89,14 @@ stages:
           name: ${{ eslzEnv.pool }}
         steps:
           - checkout: none
-          - task: DownloadBuildArtifacts@1
-            name: DownloadPlan
-            inputs:
-              buildType: current
-              downloadType: specific
-              itemPattern: "*/plan*.txt"
-              downloadPath: '$(Agent.TempDirectory)'
+          - download: current 
+            artifact: plan_${{ eslzEnv.envName }}_${{ layer }}
+            patterns: "*/plan*.txt"
           - bash: |
               # echo "##vso[task.setvariable variable=PlanChange;isOutput=true]false"
               echo "$LAYERS_JSON" | jq -r '.[]' | while read -r layername; do
-                if [[ -f $(Agent.TempDirectory)/plan_${{ eslzEnv.envName }}_$layername/plan_$layername.txt ]]; then
-                  planvar=$(cat $(Agent.TempDirectory)/plan_${{ eslzEnv.envName }}_$layername/plan_$layername.txt)
+                if [[ -f $(Pipeline.Workspace)/plan_${{ eslzEnv.envName }}_$layername/plan_$layername.txt ]]; then
+                  planvar=$(cat $(Pipeline.Workspace)/plan_${{ eslzEnv.envName }}_$layername/plan_$layername.txt)
 
                   if [[ "$planvar" =~ "No changes. Your infrastructure matches the configuration." ]]; then
                         echo "No Changes in plan detected in $layername)."

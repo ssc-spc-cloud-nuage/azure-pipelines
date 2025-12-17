@@ -29,7 +29,6 @@ jobs:
           steps:
             - download: current
               artifact: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
-              target: '$(Agent.TempDirectory)'
             - task: AzureCLI@2
               displayName: 'terragrunt apply'
               timeoutInMinutes: 240
@@ -60,7 +59,7 @@ jobs:
                   git checkout localBranch
 
                   cd $(Build.SourcesDirectory)/${{ parameters.rootEnvFolder }}/${{ parameters.eslzEnvFolder}}/${{ layer }}/
-                  terragrunt apply -auto-approve $(Agent.TempDirectory)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan
+                  terragrunt apply -auto-approve $(Pipeline.Workspace)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan
 
                   # applyExitCode=$?
                   
