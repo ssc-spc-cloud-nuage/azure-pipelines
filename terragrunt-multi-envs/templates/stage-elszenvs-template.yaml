@@ -90,7 +90,7 @@ stages:
         steps:
           - checkout: none
           - download: current
-            patterns: '*/plan*.txt'
+            patterns: 'plan*.txt'
           - bash: |
               # echo "##vso[task.setvariable variable=PlanChange;isOutput=true]false"
               echo "$LAYERS_JSON" | jq -r '.[]' | while read -r layername; do
