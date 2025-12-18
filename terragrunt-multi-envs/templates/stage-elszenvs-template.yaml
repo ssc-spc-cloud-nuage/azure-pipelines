@@ -87,9 +87,15 @@ stages:
         condition: always()  
         # pool: 
         #   name: ${{ eslzEnv.pool }}
+        variables:
+          system.debug: true
         steps:
           - checkout: none
-          - download: current 
+          - task: DownloadPipelineArtifact@2
+            name: DownloadTerraformPlans
+            inputs:
+              buildType: current
+          #- download: current 
             # condition: in(dependencies['TerragruntPlan_${{ eslzEnv.envName }}_${{ layer }}'].result, 'Succeeded')
             # artifact: plan_${{ eslzEnv.envName }}_${{ layer }}
           - bash: |

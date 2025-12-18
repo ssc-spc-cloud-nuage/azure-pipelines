@@ -21,14 +21,22 @@ jobs:
   - deployment: TerragruntApply_${{ parameters.eslzEnvFolder}}_${{ layer }}
     condition: and(succeeded(), eq(stageDependencies.${{ parameters.eslzEnvFolder }}_Plan_${{ parameters.multiRunID }}.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true'))
     environment: ${{ parameters.eslzEnvFolder}}
+    variables:
+      system.debug: true
     pool: 
       name: ${{ parameters.eslzEnvPool}}
     strategy:
       runOnce:
         deploy:
           steps:
-            - download: current
-              artifact: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
+            # - download: current
+            #   artifact: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
+            - checkout: none
+            - task: DownloadPipelineArtifact@2
+              name: DownloadTerraformPlan
+              inputs:
+                buildType: current
+                artifact: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
             - task: AzureCLI@2
               displayName: 'terragrunt apply'
               timeoutInMinutes: 240
