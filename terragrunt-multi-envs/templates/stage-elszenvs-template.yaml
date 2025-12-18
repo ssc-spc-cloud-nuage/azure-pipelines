@@ -17,7 +17,7 @@ stages:
     dependsOn: []
     jobs:
       - job: InitJob
-        # pool: ${{ eslzEnv.pool }}
+        pool: ${{ eslzEnv.pool }}
         steps:
           - checkout: none
 
@@ -85,19 +85,11 @@ stages:
         - ${{ each layer in eslzEnv.layers }}:
           - TerragruntPlan_${{ eslzEnv.envName }}_${{ layer }}
         condition: always()  
-        # pool: 
-        #   name: ${{ eslzEnv.pool }}
-        variables:
-          system.debug: true
+        pool: 
+          name: ${{ eslzEnv.pool }}
         steps:
           - checkout: none
-          - task: DownloadPipelineArtifact@2
-            name: DownloadTerraformPlans
-            inputs:
-              buildType: current
-          #- download: current 
-            # condition: in(dependencies['TerragruntPlan_${{ eslzEnv.envName }}_${{ layer }}'].result, 'Succeeded')
-            # artifact: plan_${{ eslzEnv.envName }}_${{ layer }}
+          - download: current 
           - bash: |
               
               # echo "##vso[task.setvariable variable=PlanChange;isOutput=true]false"
