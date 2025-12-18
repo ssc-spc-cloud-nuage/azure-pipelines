@@ -30,6 +30,7 @@ jobs:
             - checkout: none
             - download: current
               artifact: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
+              patterns: "*.tfplan"
             - task: AzureCLI@2
               displayName: 'terragrunt apply'
               timeoutInMinutes: 240
