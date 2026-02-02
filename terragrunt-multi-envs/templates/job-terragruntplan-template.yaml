@@ -36,6 +36,8 @@ jobs:
           scriptLocation: inlineScript
           addSpnToEnvironment: true
           inlineScript: |
+            set -euo pipefail
+
             export ARM_CLIENT_ID=$servicePrincipalId
             export ARM_OIDC_TOKEN=$idToken
             export ARM_TENANT_ID=$tenantId
