@@ -27,35 +27,10 @@ jobs:
       runOnce:
         deploy:
           steps:
-            - download: none
-            #- checkout: self # removed due multiple issues. Using scripted checkout instead.
-            - bash: |
-                set -euo pipefail
-
-                if [ ! -d "$(Agent.ToolsDirectory)/.tfenv" ]; then
-                git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tfenv.git $(Agent.ToolsDirectory)/.tfenv
-                echo 'export PATH=$(Agent.ToolsDirectory)/.tfenv/bin:$PATH' >> ~/.profile
-                $(Agent.ToolsDirectory)/.tfenv/bin/tfenv install ${{ parameters.terraformVersion }}
-                $(Agent.ToolsDirectory)/.tfenv/bin/tfenv use ${{ parameters.terraformVersion }}
-                fi
-
-                if [ ! -d "$(Agent.ToolsDirectory)/.tgenv" ]; then
-                git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tgenv.git $(Agent.ToolsDirectory)/.tgenv
-                echo 'export PATH=$(Agent.ToolsDirectory)/.tgenv/bin:$PATH' >> ~/.profile
-                $(Agent.ToolsDirectory)/.tgenv/bin/tgenv install ${{ parameters.terragruntVersion }}
-                $(Agent.ToolsDirectory)/.tgenv/bin/tgenv use ${{ parameters.terragruntVersion }}
-                fi
-
-                source ~/.profile
-            
-              displayName: 'install terraform/terragrunt'
-            - task: DownloadBuildArtifacts@1
-              name: DownloadPlan
-              inputs:
-                buildType: current
-                downloadType: single
-                artifactName: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
-                downloadPath: '$(Agent.TempDirectory)'
+            - checkout: none
+            - download: current
+              artifact: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
+              patterns: "*.tfplan"
             - task: AzureCLI@2
               displayName: 'terragrunt apply'
               timeoutInMinutes: 240
@@ -86,7 +61,7 @@ jobs:
                   git checkout localBranch
 
                   cd $(Build.SourcesDirectory)/${{ parameters.rootEnvFolder }}/${{ parameters.eslzEnvFolder}}/${{ layer }}/
-                  terragrunt apply -auto-approve $(Agent.TempDirectory)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan
+                  terragrunt apply -auto-approve $(Pipeline.Workspace)/plan_${{ parameters.eslzEnvFolder}}_${{ layer }}/plan.tfplan
 
                   # applyExitCode=$?
                   

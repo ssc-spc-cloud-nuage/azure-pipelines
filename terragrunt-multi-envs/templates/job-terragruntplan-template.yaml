@@ -24,11 +24,8 @@ jobs:
         in(dependencies.RestrictedFilesValidation.result, 'Succeeded', 'SucceededWithIssues', 'Skipped'),
         eq(dependencies.InitJob.outputs['GitDiffTask.RepoChange${{ layer }}'], 'true')
       )
-    variables:
-      AgentName: $[ dependencies.InitJob.outputs['InstallTools.JobAgentName'] ]
     pool: 
       name: ${{ parameters.eslzEnvPool }}
-      demands: Agent.Name -equals $(AgentName)
     steps:
       - checkout: none # Implementing scripted checkout in init task due to multiple bugs with remote repo checkout : https://github.com/microsoft/azure-pipelines-agent/issues/4078
       - task: AzureCLI@2
@@ -151,9 +148,6 @@ jobs:
           BUILD_REPOSITORYID: $(Build.Repository.ID)
           SYSTEM_PULLREQUEST_PULLREQUESTID: $(System.PullRequest.PullRequestId)
 
-      - task: PublishBuildArtifacts@1
-        name: PublishPlan
-        inputs:
-          PathtoPublish: $(Build.ArtifactStagingDirectory)
-          ArtifactName: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
+      - publish: $(Build.ArtifactStagingDirectory)
+        artifact: plan_${{ parameters.eslzEnvFolder}}_${{ layer }}
       

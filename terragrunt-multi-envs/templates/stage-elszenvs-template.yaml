@@ -13,55 +13,13 @@ parameters:
 stages: 
 - ${{ each eslzEnv in parameters.eslzEnvs }}:  
   - stage: ${{ eslzEnv.envName }}_Plan_${{ eslzEnv.multiRunID }}
-    dependsOn: StartAgents # added to start ACI
     condition: always()
+    dependsOn: []
     jobs:
       - job: InitJob
         pool: ${{ eslzEnv.pool }}
         steps:
           - checkout: none
-          - bash: |
-              set -euo pipefail
-
-              if ! command -v jq &> /dev/null; then
-                sudo apt-get update
-                sudo apt-get install -y jq
-              fi
-
-              if ! command -v unzip &> /dev/null; then
-                sudo apt-get update
-                sudo apt-get install -y unzip
-              fi
- 
-              if ! command -v az &> /dev/null; then
-                curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-              fi
-
-              if [ ! -d "$(Agent.ToolsDirectory)/.tfenv" ]; then
-                git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tfenv.git $(Agent.ToolsDirectory)/.tfenv
-                echo 'export PATH=$(Agent.ToolsDirectory)/.tfenv/bin:$PATH' >> ~/.profile
-              fi
-              $(Agent.ToolsDirectory)/.tfenv/bin/tfenv install ${{ parameters.terraformVersion }}
-              $(Agent.ToolsDirectory)/.tfenv/bin/tfenv use ${{ parameters.terraformVersion }}
-
-              if [ ! -d "$(Agent.ToolsDirectory)/.tgenv" ]; then
-                git clone --depth=1 https://github.com/ssc-spc-cloud-nuage/tgenv.git $(Agent.ToolsDirectory)/.tgenv
-                echo 'export PATH=$(Agent.ToolsDirectory)/.tgenv/bin:$PATH' >> ~/.profile
-              fi
-              $(Agent.ToolsDirectory)/.tgenv/bin/tgenv install ${{ parameters.terragruntVersion }}
-              $(Agent.ToolsDirectory)/.tgenv/bin/tgenv use ${{ parameters.terragruntVersion }}
-
-              if ! command -v checkov &> /dev/null; then
-                sudo apt-get update
-                sudo apt install python3-pip -y
-                pip3 install checkov
-                echo 'export PATH=$HOME/.local/bin:$PATH' >> ~/.profile
-              fi
-
-              source ~/.profile
-
-              echo "##vso[task.setvariable variable=JobAgentName;isOutput=true]$(Agent.Name)"
-            name: InstallTools
 
           - bash: |
               if [[ $(Build.Reason) == "PullRequest" ]]; then
@@ -126,26 +84,18 @@ stages:
         - InitJob
         - ${{ each layer in eslzEnv.layers }}:
           - TerragruntPlan_${{ eslzEnv.envName }}_${{ layer }}
-        condition: always()
-        variables:
-          AgentName: $[ dependencies.InitJob.outputs['InstallTools.JobAgentName'] ]
+        condition: always()  
         pool: 
           name: ${{ eslzEnv.pool }}
-          demands: Agent.Name -equals $(AgentName)
         steps:
           - checkout: none
-          - task: DownloadBuildArtifacts@1
-            name: DownloadPlan
-            inputs:
-              buildType: current
-              downloadType: specific
-              itemPattern: "*/plan*.txt"
-              downloadPath: '$(Agent.TempDirectory)'
+          - download: current
+            patterns: 'plan*.txt'
           - bash: |
               # echo "##vso[task.setvariable variable=PlanChange;isOutput=true]false"
               echo "$LAYERS_JSON" | jq -r '.[]' | while read -r layername; do
-                if [[ -f $(Agent.TempDirectory)/plan_${{ eslzEnv.envName }}_$layername/plan_$layername.txt ]]; then
-                  planvar=$(cat $(Agent.TempDirectory)/plan_${{ eslzEnv.envName }}_$layername/plan_$layername.txt)
+                if [[ -f $(Pipeline.Workspace)/plan_${{ eslzEnv.envName }}_$layername/plan_$layername.txt ]]; then
+                  planvar=$(cat $(Pipeline.Workspace)/plan_${{ eslzEnv.envName }}_$layername/plan_$layername.txt)
 
                   if [[ "$planvar" =~ "No changes. Your infrastructure matches the configuration." ]]; then
                         echo "No Changes in plan detected in $layername)."
@@ -179,8 +129,6 @@ stages:
               
   - stage: ${{ eslzEnv.envName }}_Apply_${{ eslzEnv.multiRunID }}
     pool: ${{ eslzEnv.pool }}
-    variables:
-      AgentName2: $[ stageDependencies.${{ eslzEnv.envName }}_Plan_${{ eslzEnv.multiRunID }}.InitJob.outputs['TFTGInstall.JobAgentName'] ]
     dependsOn: ${{ eslzEnv.envName }}_Plan_${{ eslzEnv.multiRunID }}
     condition: and(succeeded(), eq(dependencies.${{ eslzEnv.envName }}_Plan_${{ eslzEnv.multiRunID }}.outputs['PostPlanJob.CheckPlanChangeTask.PlanChange'], 'true'))
     jobs:
