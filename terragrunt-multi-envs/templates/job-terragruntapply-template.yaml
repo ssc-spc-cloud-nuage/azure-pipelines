@@ -45,8 +45,9 @@ jobs:
                 $(Agent.ToolsDirectory)/.tgenv/bin/tgenv install ${{ parameters.terragruntVersion }}
                 $(Agent.ToolsDirectory)/.tgenv/bin/tgenv use ${{ parameters.terragruntVersion }}
                 fi
-
+                set +u
                 source ~/.profile
+                set -u
             
               displayName: 'install terraform/terragrunt'
             - task: DownloadBuildArtifacts@1
