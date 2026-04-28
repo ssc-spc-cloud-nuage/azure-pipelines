@@ -124,19 +124,38 @@ jobs:
           targetType: inline
           script: |
             if [ "$(Build.Reason)" == "PullRequest" ]; then
-                
+
                 cd $(agent.tempdirectory)
-                echo "# Plan For ${{ parameters.eslzEnvFolder}}/${{ layer }} :" > commentplan_${{ layer }}.txt
-                cat $(Build.ArtifactStagingDirectory)/plan_${{ layer }}.txt >> commentplan_${{ layer }}.txt
+            COMMENT_FILE="commentplan_${{ layer }}.txt"
+            PAYLOAD_FILE="commentplan_${{ layer }}.json"
+            MAX_ADO_COMMENT_CHARS=50000
+
+            echo "# Plan For ${{ parameters.eslzEnvFolder}}/${{ layer }} :" > "$COMMENT_FILE"
+            cat "$(Build.ArtifactStagingDirectory)/plan_${{ layer }}.txt" >> "$COMMENT_FILE"
+
+            COMMENT_LENGTH=$(wc -m < "$COMMENT_FILE" | tr -d ' ')
+            if [ "$COMMENT_LENGTH" -gt "$MAX_ADO_COMMENT_CHARS" ]; then
+              TRUNCATION_NOTICE=$'\n\n---\nComment was truncated to respect Azure DevOps comment size limit.'
+              NOTICE_LENGTH=$(printf "%s" "$TRUNCATION_NOTICE" | wc -m | tr -d ' ')
+              ALLOWED_LENGTH=$((MAX_ADO_COMMENT_CHARS - NOTICE_LENGTH))
+              if [ "$ALLOWED_LENGTH" -lt 0 ]; then
+                ALLOWED_LENGTH=0
+              fi
+
+              head -c "$ALLOWED_LENGTH" "$COMMENT_FILE" > "${COMMENT_FILE}.tmp"
+              printf "%s" "$TRUNCATION_NOTICE" >> "${COMMENT_FILE}.tmp"
+              mv "${COMMENT_FILE}.tmp" "$COMMENT_FILE"
+            fi
+
                 ENCODED_URL=$(echo "${SYSTEM_COLLECTIONURI}${SYSTEM_TEAMPROJECT}/_apis/git/repositories/${BUILD_REPOSITORYID}/pullRequests/${SYSTEM_PULLREQUEST_PULLREQUESTID}/threads?api-version=7.1-preview.1" | sed 's/ /%20/g')
-                COMMENT_JSON=$(jq --rawfile comment commentplan_${{ layer }}.txt '.comments[0].content=$comment' <<< '{"comments": [{"parentCommentId": 0,"content": "","commentType": 1}],"status": 1}')
+            jq --rawfile comment "$COMMENT_FILE" '.comments[0].content=$comment' <<< '{"comments": [{"parentCommentId": 0,"content": "","commentType": 1}],"status": 1}' > "$PAYLOAD_FILE"
             
                 echo "POSTING TO $ENCODED_URL"
                 curl "$ENCODED_URL" \
                 --header "Content-Type: application/json" \
                 --header "Accept: application/json" \
                 --header "Authorization: Bearer $SYSTEM_ACCESSTOKEN" \
-                --data "$COMMENT_JSON" \
+            --data-binary "@$PAYLOAD_FILE" \
                 --verbose
             else
                 echo "Skipping post comment due to no pull request"
