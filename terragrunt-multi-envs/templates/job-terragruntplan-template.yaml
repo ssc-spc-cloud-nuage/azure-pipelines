@@ -92,7 +92,7 @@ jobs:
             set -e       
             cd $(Build.SourcesDirectory)/${{ parameters.rootEnvFolder }}/${{ parameters.eslzEnvFolder}}/${{ layer }}/
             terragrunt plan --out=$(Build.ArtifactStagingDirectory)/plan.tfplan
-            terragrunt show -no-color --terragrunt-forward-tf-stdout $(Build.ArtifactStagingDirectory)/plan.tfplan > $(Build.ArtifactStagingDirectory)/plan_${{ layer }}.txt
+            terragrunt show -no-color --tf-forward-stdout $(Build.ArtifactStagingDirectory)/plan.tfplan > $(Build.ArtifactStagingDirectory)/plan_${{ layer }}.txt
         env:
           ARM_CLIENT_ID: $(ARMClient)
           ARM_TENANT_ID: $(TenantID)
